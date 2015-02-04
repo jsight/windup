@@ -49,23 +49,23 @@ public class QueryConditionTest
     public static ForgeArchive getDeployment()
     {
         final ForgeArchive archive = ShrinkWrap.create(ForgeArchive.class)
-                    .addBeansXML()
-                    .addClasses(TestMavenExampleRuleProvider.class,
-                                TestJavaExampleRuleProvider.class,
-                                TestXmlExampleRuleProvider1.class,
-                                TestXmlExampleRuleProvider2.class,
-                                TestXmlExampleRuleProvider3.class,
-                                TestGremlinQueryOnlyRuleProvider.class,
-                                TestXmlMetaFacetModel.class,
-                                TestSomeModel.class,
-                                TestWindupConfigurationExampleRuleProvider.class)
-                    .addAsAddonDependencies(
-                                AddonDependencyEntry.create("org.jboss.windup.utils:utils"),
-                                AddonDependencyEntry.create("org.jboss.windup.config:windup-config"),
-                                AddonDependencyEntry.create("org.jboss.windup.graph:windup-graph"),
-                                AddonDependencyEntry.create("org.jboss.windup.rules.apps:rules-java"),
-                                AddonDependencyEntry.create("org.jboss.forge.furnace.container:cdi")
-                    );
+            .addBeansXML()
+            .addClasses(TestMavenExampleRuleProvider.class,
+                TestJavaExampleRuleProvider.class,
+                TestXmlExampleRuleProvider1.class,
+                TestXmlExampleRuleProvider2.class,
+                TestXmlExampleRuleProvider3.class,
+                TestGremlinQueryOnlyRuleProvider.class,
+                TestXmlMetaFacetModel.class,
+                TestSomeModel.class,
+                TestWindupConfigurationExampleRuleProvider.class)
+            .addAsAddonDependencies(
+                AddonDependencyEntry.create("org.jboss.windup.utils:utils"),
+                AddonDependencyEntry.create("org.jboss.windup.config:windup-config"),
+                AddonDependencyEntry.create("org.jboss.windup.graph:windup-graph"),
+                AddonDependencyEntry.create("org.jboss.windup.rules.apps:rules-java"),
+                AddonDependencyEntry.create("org.jboss.forge.furnace.container:cdi")
+            );
         return archive;
     }
 
