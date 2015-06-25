@@ -157,6 +157,7 @@ public class UnzipArchiveToOutputFolder extends AbstractIterationOperation<Archi
                 FileService fileService, ArchiveModel archiveModel,
                 FileModel parentFileModel)
     {
+        int numberAdded = 0;
         FileFilter filter = TrueFileFilter.TRUE;
         if (archiveModel instanceof IdentifiedArchiveModel)
         {
@@ -175,6 +176,11 @@ public class UnzipArchiveToOutputFolder extends AbstractIterationOperation<Archi
                     if (!filter.accept(subFile))
                     {
                         continue;
+                    }
+                    numberAdded++;
+                    if (numberAdded % 250 == 0)
+                    {
+                        context.getGraph().getBaseGraph().commit();
                     }
 
                     FileModel subFileModel = fileService.createByFilePath(parentFileModel, subFile.getAbsolutePath());
