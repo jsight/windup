@@ -89,7 +89,7 @@ public class InlineHintService extends GraphService<InlineHintModel>
             int hintEffort = 0;
             for (Vertex v : inlineHintPipeline)
             {
-                hintEffort += v.getProperty(InlineHintModel.EFFORT);
+                hintEffort += (Integer) v.getProperty(InlineHintModel.EFFORT);
             }
 
             if (recursive)
