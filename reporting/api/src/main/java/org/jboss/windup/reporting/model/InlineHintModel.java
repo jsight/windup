@@ -17,15 +17,15 @@ import com.tinkerpop.frames.modules.typedgraph.TypeValue;
 @TypeValue(InlineHintModel.TYPE)
 public interface InlineHintModel extends FileLocationModel
 {
-    static final String TYPE = "InlineHintModel";
-    static final String TYPE_PREFIX = TYPE + ":";
-    static final String TITLE = TYPE_PREFIX + "title";
-    static final String HINT = TYPE_PREFIX + "hint";
-    static final String SEVERITY = TYPE_PREFIX + "severity";
-    static final String RULE_ID = TYPE_PREFIX + "ruleID";
-    static final String EFFORT = TYPE_PREFIX + "effort";
-    static final String LINKS = TYPE_PREFIX + "links";
-    static final String FILE_LOCATION_REFERENCE = TYPE_PREFIX + "fileLocationReference";
+    String TYPE = "InlineHintModel";
+    String TYPE_PREFIX = TYPE + ":";
+    String TITLE = TYPE_PREFIX + "title";
+    String HINT = TYPE_PREFIX + "hint";
+    String SEVERITY = TYPE_PREFIX + "severity";
+    String RULE_ID = TYPE_PREFIX + "ruleID";
+    String EFFORT = TYPE_PREFIX + "effort";
+    String LINKS = TYPE_PREFIX + "links";
+    String FILE_LOCATION_REFERENCE = TYPE_PREFIX + "fileLocationReference";
 
     /**
      * A short descriptive text describing the problem covered by this hint

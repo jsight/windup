@@ -9,6 +9,7 @@ import org.jboss.windup.graph.model.WindupVertexFrame;
 import org.jboss.windup.graph.model.resource.FileModel;
 import org.jboss.windup.graph.service.GraphService;
 import org.jboss.windup.reporting.model.ClassificationModel;
+import org.jboss.windup.util.ExecutionStatistics;
 
 import com.thinkaurelius.titan.core.attribute.Text;
 import com.tinkerpop.blueprints.Vertex;
@@ -69,27 +70,36 @@ public class ClassificationService extends GraphService<ClassificationModel>
      */
     public int getMigrationEffortPoints(ProjectModel projectModel, boolean recursive)
     {
-        GremlinPipeline<Vertex, Vertex> classificationPipeline = new GremlinPipeline<>(projectModel.asVertex());
-        classificationPipeline.out(ProjectModel.PROJECT_MODEL_TO_FILE).in(ClassificationModel.FILE_MODEL);
-        classificationPipeline.has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, ClassificationModel.TYPE);
+        String taskName = getClass().getName() + "getMigrationEffortPortsForProjectModel(" + recursive + ")";
+        ExecutionStatistics.get().begin(taskName);
+        try
+        {
+            GremlinPipeline<Vertex, Vertex> classificationPipeline = new GremlinPipeline<>(projectModel.asVertex());
+            classificationPipeline.out(ProjectModel.PROJECT_MODEL_TO_FILE).in(ClassificationModel.FILE_MODEL);
+            classificationPipeline.has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, ClassificationModel.TYPE);
 
-        int classificationEffort = 0;
-        for (Vertex v : classificationPipeline)
-        {
-            Integer migrationEffort = v.getProperty(ClassificationModel.EFFORT);
-            if (migrationEffort != null)
+            int classificationEffort = 0;
+            for (Vertex v : classificationPipeline)
             {
-                classificationEffort += migrationEffort;
+                Integer migrationEffort = v.getProperty(ClassificationModel.EFFORT);
+                if (migrationEffort != null)
+                {
+                    classificationEffort += migrationEffort;
+                }
             }
-        }
-        if (recursive)
-        {
-            for (ProjectModel childProject : projectModel.getChildProjects())
+            if (recursive)
             {
-                classificationEffort += getMigrationEffortPoints(childProject, recursive);
+                for (ProjectModel childProject : projectModel.getChildProjects())
+                {
+                    classificationEffort += getMigrationEffortPoints(childProject, recursive);
+                }
             }
+            return classificationEffort;
         }
-        return classificationEffort;
+        finally
+        {
+            ExecutionStatistics.get().end(taskName);
+        }
     }
 
     /**

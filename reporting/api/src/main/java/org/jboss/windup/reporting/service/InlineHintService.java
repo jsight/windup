@@ -8,6 +8,7 @@ import org.jboss.windup.graph.model.resource.FileModel;
 import org.jboss.windup.graph.service.GraphService;
 import org.jboss.windup.reporting.model.InlineHintModel;
 import org.jboss.windup.rules.files.model.FileReferenceModel;
+import org.jboss.windup.util.ExecutionStatistics;
 
 import com.thinkaurelius.titan.core.attribute.Text;
 import com.tinkerpop.blueprints.Vertex;
@@ -76,23 +77,33 @@ public class InlineHintService extends GraphService<InlineHintModel>
      */
     public int getMigrationEffortPoints(ProjectModel projectModel, boolean recursive)
     {
-        GremlinPipeline<Vertex, Vertex> inlineHintPipeline = new GremlinPipeline<>(projectModel.asVertex());
-        inlineHintPipeline.out(ProjectModel.PROJECT_MODEL_TO_FILE).in(InlineHintModel.FILE_MODEL);
-        inlineHintPipeline.has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, InlineHintModel.TYPE);
-
-        int hintEffort = 0;
-        for (Vertex v : inlineHintPipeline)
+        String taskName = getClass().getName() + "getMigrationEffortPortsForProjectModel(" + recursive + ")";
+        ExecutionStatistics.get().begin(taskName);
+        try
         {
-            hintEffort += (Integer) v.getProperty(InlineHintModel.EFFORT);
-        }
 
-        if (recursive)
-        {
-            for (ProjectModel childProject : projectModel.getChildProjects())
+            GremlinPipeline<Vertex, Vertex> inlineHintPipeline = new GremlinPipeline<>(projectModel.asVertex());
+            inlineHintPipeline.out(ProjectModel.PROJECT_MODEL_TO_FILE).in(InlineHintModel.FILE_MODEL);
+            inlineHintPipeline.has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, InlineHintModel.TYPE);
+
+            int hintEffort = 0;
+            for (Vertex v : inlineHintPipeline)
             {
-                hintEffort += getMigrationEffortPoints(childProject, recursive);
+                hintEffort += v.getProperty(InlineHintModel.EFFORT);
             }
+
+            if (recursive)
+            {
+                for (ProjectModel childProject : projectModel.getChildProjects())
+                {
+                    hintEffort += getMigrationEffortPoints(childProject, recursive);
+                }
+            }
+            return hintEffort;
         }
-        return hintEffort;
+        finally
+        {
+            ExecutionStatistics.get().end(taskName);
+        }
     }
 }

@@ -16,6 +16,7 @@ import org.jboss.windup.reporting.model.InlineHintModel;
 import org.jboss.windup.reporting.model.Severity;
 import org.jboss.windup.rules.files.model.FileLocationModel;
 import org.ocpsoft.rewrite.config.OperationBuilder;
+import org.ocpsoft.rewrite.config.Rule;
 import org.ocpsoft.rewrite.context.EvaluationContext;
 import org.ocpsoft.rewrite.param.ParameterStore;
 import org.ocpsoft.rewrite.param.RegexParameterizedPatternParser;
@@ -101,6 +102,8 @@ public class Hint extends ParameterizedIterationOperation<FileLocationModel> imp
         hintModel.setFile(locationModel.getFile());
         hintModel.setEffort(effort);
         hintModel.setSeverity(this.severity);
+        hintModel.setRuleID(((Rule) context.get(Rule.class)).getId());
+
         if (hintTitlePattern != null)
         {
             hintModel.setTitle(hintTitlePattern.getBuilder().build(event, context));

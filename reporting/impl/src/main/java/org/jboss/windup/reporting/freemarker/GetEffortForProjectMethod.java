@@ -53,7 +53,7 @@ public class GetEffortForProjectMethod implements WindupFreeMarkerMethod
     @Override
     public Object exec(@SuppressWarnings("rawtypes") List arguments) throws TemplateModelException
     {
-        ExecutionStatistics.get().begin(NAME);
+        ExecutionStatistics.get().begin(getClass().getName());
         if (arguments.size() != 2)
         {
             throw new TemplateModelException(
@@ -67,7 +67,7 @@ public class GetEffortForProjectMethod implements WindupFreeMarkerMethod
 
         Object result = classificationService.getMigrationEffortPoints(projectModel, recursive)
                     + inlineHintService.getMigrationEffortPoints(projectModel, recursive);
-        ExecutionStatistics.get().end(NAME);
+        ExecutionStatistics.get().end(getClass().getName());
         return result;
     }
 }
