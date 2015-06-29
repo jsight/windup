@@ -107,7 +107,7 @@ public class FernflowerDecompilerOperation extends GraphOperation
 
         ProgressEstimate progressEstimate = new ProgressEstimate(totalWork);
 
-        AddDecompiledItemsToGraph addDecompiledItemsToGraph = new AddDecompiledItemsToGraph(progressEstimate, event);
+        AddDecompiledItemsToGraph addDecompiledItemsToGraph = new AddDecompiledItemsToGraph(progressEstimate, event, ExecutionStatistics.get());
         FernflowerDecompiler decompiler = new FernflowerDecompiler();
         decompiler.setExecutorService(Executors.newFixedThreadPool(threads), threads);
         decompiler.decompileClassFiles(classesToDecompile, addDecompiledItemsToGraph);
@@ -124,6 +124,7 @@ public class FernflowerDecompilerOperation extends GraphOperation
      */
     private class AddDecompiledItemsToGraph implements DecompilationListener
     {
+        private final ExecutionStatistics executionStatistics;
         private final ExecutorService executorService = Executors.newSingleThreadExecutor();
         private final AtomicInteger queueSize = new AtomicInteger(0);
 
@@ -131,10 +132,11 @@ public class FernflowerDecompilerOperation extends GraphOperation
         private final AtomicInteger atomicInteger = new AtomicInteger(0);
         private final ProgressEstimate progressEstimate;
 
-        private AddDecompiledItemsToGraph(ProgressEstimate progressEstimate, GraphRewrite event)
+        private AddDecompiledItemsToGraph(ProgressEstimate progressEstimate, GraphRewrite event, ExecutionStatistics executionStatistics)
         {
             this.progressEstimate = progressEstimate;
             this.event = event;
+            this.executionStatistics = executionStatistics;
         }
 
         @Override
@@ -175,7 +177,7 @@ public class FernflowerDecompilerOperation extends GraphOperation
                 public void run()
                 {
                     String taskName = "FernflowerDecompilerOperationSaveResults";
-                    ExecutionStatistics.get().begin(taskName);
+                    executionStatistics.begin(taskName);
                     try
                     {
                         queueSize.decrementAndGet();
@@ -282,7 +284,7 @@ public class FernflowerDecompilerOperation extends GraphOperation
                     }
                     finally
                     {
-                        ExecutionStatistics.get().end(taskName);
+                        executionStatistics.end(taskName);
                     }
                 }
             };
