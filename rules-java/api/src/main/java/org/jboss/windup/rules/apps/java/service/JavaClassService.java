@@ -11,6 +11,8 @@ import org.jboss.windup.graph.service.GraphService;
 import org.jboss.windup.graph.service.exception.NonUniqueResultException;
 import org.jboss.windup.rules.apps.java.model.AmbiguousJavaClassModel;
 import org.jboss.windup.rules.apps.java.model.JavaClassModel;
+import org.jboss.windup.rules.apps.java.model.JavaMethodModel;
+import org.jboss.windup.rules.apps.java.model.JavaParameterModel;
 import org.jboss.windup.rules.apps.java.model.JavaSourceFileModel;
 import org.jboss.windup.rules.apps.java.model.PhantomJavaClassModel;
 import org.jboss.windup.util.ExecutionStatistics;
@@ -104,6 +106,16 @@ public class JavaClassService extends GraphService<JavaClassModel>
 
     }
 
+    public Iterable<JavaClassModel> findByJavaVersion(JavaVersion version)
+    {
+        ExecutionStatistics.get().begin("JavaClassService.findByJavaVersion(version)");
+        Iterable<JavaClassModel> result = getGraphContext().getQuery().type(JavaClassModel.class)
+                    .has(JavaClassModel.MAJOR_VERSION, version.getMajor())
+                    .has(JavaClassModel.MINOR_VERSION, version.getMinor()).vertices(getType());
+        ExecutionStatistics.get().end("JavaClassService.findByJavaVersion(version)");
+        return result;
+    }
+
     /**
      * Since {@link JavaClassModel} may actually be ambiguous if multiple copies of the class have been defined, attempt to resolve the unique
      * instance, or return an {@link AmbiguousJavaClassModel} if multiple types exist.
@@ -155,6 +167,25 @@ public class JavaClassService extends GraphService<JavaClassModel>
         }
     }
 
+    public JavaMethodModel addJavaMethod(JavaClassModel jcm, String methodName, JavaClassModel[] params)
+    {
+        ExecutionStatistics.get().begin("JavaClassService.addJavaMethod(jcm, methodName, params)");
+        JavaMethodModel javaMethodModel = getGraphContext().getFramed().addVertex(null, JavaMethodModel.class);
+        javaMethodModel.setMethodName(methodName);
+
+        for (int i = 0; i < params.length; i++)
+        {
+            JavaClassModel param = params[i];
+            JavaParameterModel paramModel = getGraphContext().getFramed().addVertex(null, JavaParameterModel.class);
+            paramModel.setJavaType(param);
+            paramModel.setPosition(i);
+            javaMethodModel.addMethodParameter(paramModel);
+        }
+        jcm.addJavaMethod(javaMethodModel);
+        ExecutionStatistics.get().end("JavaClassService.addJavaMethod(jcm, methodName, params)");
+        return javaMethodModel;
+    }
+    
     public Iterable<JavaSourceFileModel> getJavaSource(String clz) {
         List<JavaSourceFileModel> sources = new LinkedList<>();
         
@@ -185,7 +216,10 @@ public class JavaClassService extends GraphService<JavaClassModel>
                 sources.add(classModel.getOriginalSource());
             }
         }
-
+        
+        
+        
+        
         return sources;
     }
     

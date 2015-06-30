@@ -6,11 +6,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jboss.forge.furnace.util.Strings;
 import org.jboss.forge.roaster.ParserException;
 import org.jboss.forge.roaster.Roaster;
+import org.jboss.forge.roaster.model.Extendable;
+import org.jboss.forge.roaster.model.InterfaceCapable;
 import org.jboss.forge.roaster.model.source.JavaSource;
 import org.jboss.windup.config.AbstractRuleProvider;
 import org.jboss.windup.config.GraphRewrite;
@@ -197,6 +201,28 @@ public class IndexJavaSourceFilesRuleProvider extends AbstractRuleProvider
             javaClassModel.setQualifiedName(qualifiedName);
             javaClassModel.setClassFile(sourceFileModel);
             javaClassModel.setPublic(javaSource.isPublic());
+
+            if (javaSource instanceof InterfaceCapable)
+            {
+                InterfaceCapable interfaceCapable = (InterfaceCapable) javaSource;
+                List<String> interfaceNames = interfaceCapable.getInterfaces();
+                if (interfaceNames != null)
+                {
+                    for (String iface : interfaceNames)
+                    {
+                        JavaClassModel interfaceModel = javaClassService.getOrCreatePhantom(iface);
+                        javaClassModel.addImplements(interfaceModel);
+                    }
+                }
+            }
+
+            if (javaSource instanceof Extendable)
+            {
+                Extendable<?> extendable = (Extendable<?>) javaSource;
+                String superclassName = extendable.getSuperType();
+                if (Strings.isNullOrEmpty(superclassName))
+                    javaClassModel.setExtends(javaClassService.getOrCreatePhantom(superclassName));
+            }
 
             sourceFileModel.addJavaClass(javaClassModel);
         }
