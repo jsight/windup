@@ -70,7 +70,7 @@ public class ClassificationService extends GraphService<ClassificationModel>
      */
     public int getMigrationEffortPoints(ProjectModel projectModel, boolean recursive)
     {
-        String taskName = getClass().getName() + "getMigrationEffortPortsForProjectModel(" + recursive + ")";
+        String taskName = getClass().getName() + ".getMigrationEffortPortsForProjectModel(" + recursive + ")";
         ExecutionStatistics.get().begin(taskName);
         try
         {
@@ -91,7 +91,12 @@ public class ClassificationService extends GraphService<ClassificationModel>
             {
                 for (ProjectModel childProject : projectModel.getChildProjects())
                 {
+                    // ExecutionStatistics cannot be called recursively, so pause around the recursive call
+                    ExecutionStatistics.get().end(taskName);
+
                     classificationEffort += getMigrationEffortPoints(childProject, recursive);
+
+                    ExecutionStatistics.get().begin(taskName);
                 }
             }
             return classificationEffort;

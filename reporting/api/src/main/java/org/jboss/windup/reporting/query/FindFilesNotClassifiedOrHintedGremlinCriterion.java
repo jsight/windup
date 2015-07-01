@@ -32,15 +32,13 @@ public class FindFilesNotClassifiedOrHintedGremlinCriterion
             {
                 GremlinPipeline hasClassification = new GremlinPipeline(vertex);
                 hasClassification.in(ClassificationModel.FILE_MODEL).has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, ClassificationModel.TYPE);
-                long classificationCount = hasClassification.count();
-                if (classificationCount > 0)
+                if (hasClassification.iterator().hasNext())
                     continue;
 
                 GremlinPipeline hasHint = new GremlinPipeline(vertex);
                 hasHint.in(FileLocationModel.FILE_MODEL).has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, InlineHintModel.TYPE);
-                long hintCount = hasHint.count();
 
-                if (hintCount == 0)
+                if (!hasHint.iterator().hasNext())
                     results.add(vertex);
             }
 

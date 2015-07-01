@@ -77,11 +77,10 @@ public class InlineHintService extends GraphService<InlineHintModel>
      */
     public int getMigrationEffortPoints(ProjectModel projectModel, boolean recursive)
     {
-        String taskName = getClass().getName() + "getMigrationEffortPortsForProjectModel(" + recursive + ")";
+        String taskName = getClass().getName() + ".getMigrationEffortPortsForProjectModel(" + recursive + ")";
         ExecutionStatistics.get().begin(taskName);
         try
         {
-
             GremlinPipeline<Vertex, Vertex> inlineHintPipeline = new GremlinPipeline<>(projectModel.asVertex());
             inlineHintPipeline.out(ProjectModel.PROJECT_MODEL_TO_FILE).in(InlineHintModel.FILE_MODEL);
             inlineHintPipeline.has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, InlineHintModel.TYPE);
@@ -96,7 +95,12 @@ public class InlineHintService extends GraphService<InlineHintModel>
             {
                 for (ProjectModel childProject : projectModel.getChildProjects())
                 {
+                    // ExecutionStatistics cannot be called recursively, so pause around the recursive call
+                    ExecutionStatistics.get().end(taskName);
+
                     hintEffort += getMigrationEffortPoints(childProject, recursive);
+
+                    ExecutionStatistics.get().begin(taskName);
                 }
             }
             return hintEffort;
