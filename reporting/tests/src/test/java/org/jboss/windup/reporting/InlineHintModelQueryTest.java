@@ -171,7 +171,7 @@ public class InlineHintModelQueryTest
     }
 
     @Test
-    public void testFindingNonClassifiedFiles() throws Exception
+    public void testFindingNotHintedOrClassifiedFiles() throws Exception
     {
         FileModel f1 = context.getFramed().addVertex(null, FileModel.class);
         f1.setFilePath("/f1");
