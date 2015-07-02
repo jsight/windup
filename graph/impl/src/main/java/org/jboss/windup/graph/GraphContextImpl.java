@@ -1,5 +1,6 @@
 package org.jboss.windup.graph;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -12,6 +13,8 @@ import java.util.logging.Logger;
 
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.jboss.forge.furnace.Furnace;
 import org.jboss.forge.furnace.services.Imported;
@@ -40,9 +43,6 @@ import com.tinkerpop.frames.modules.FrameClassLoaderResolver;
 import com.tinkerpop.frames.modules.Module;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import java.io.File;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 
 public class GraphContextImpl implements GraphContext
 {
@@ -240,7 +240,8 @@ public class GraphContextImpl implements GraphContext
 
         // Increase storage write buffer since we basically do a large bulk load during the first phases.
         // See http://s3.thinkaurelius.com/docs/titan/current/bulk-loading.html
-        conf.setProperty("storage.buffer-size", "4096");
+        conf.setProperty("storage.buffer-size", "32768");
+        conf.setProperty("ids.block-size", "500000");
 
         //
         // turn on a db-cache that persists across txn boundaries, but make it relatively small
