@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.forge.furnace.Furnace;
 import org.jboss.forge.furnace.repositories.AddonRepository;
@@ -350,6 +352,10 @@ public class Bootstrap
     {
         if (furnace != null && !furnace.getStatus().isStopped())
             furnace.stop();
+
+        // redirect output (to avoid spurious undeploy messages from weld)
+        System.setErr(new PrintStream(new ByteArrayOutputStream()));
+        System.setOut(new PrintStream(new ByteArrayOutputStream()));
 
         System.exit(0);
     }

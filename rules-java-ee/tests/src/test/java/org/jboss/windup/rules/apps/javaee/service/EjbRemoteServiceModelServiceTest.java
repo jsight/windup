@@ -53,7 +53,6 @@ public class EjbRemoteServiceModelServiceTest extends AbstractTest
     public void tearDown() throws Exception
     {
         this.context.clear();
-        FileUtils.deleteDirectory(this.graphPath.toFile());
     }
 
     @Test

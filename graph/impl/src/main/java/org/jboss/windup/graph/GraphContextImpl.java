@@ -22,6 +22,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.forge.furnace.Furnace;
@@ -32,8 +33,6 @@ import org.jboss.windup.graph.listeners.AfterGraphInitializationListener;
 import org.jboss.windup.graph.listeners.BeforeGraphCloseListener;
 import org.jboss.windup.graph.model.WindupFrame;
 import org.jboss.windup.graph.model.WindupVertexFrame;
-import org.jboss.windup.graph.service.GraphService;
-import org.jboss.windup.util.exception.WindupException;
 
 import com.sleepycat.je.LockMode;
 import com.thinkaurelius.titan.core.Cardinality;
@@ -92,7 +91,7 @@ public class GraphContextImpl implements GraphContext
     public GraphContextImpl create()
     {
         FileUtils.deleteQuietly(graphDir.toFile());
-        TitanGraph titan = initializeTitanGraph();
+        TitanGraph titan = initializeTitanGraph(true);
         initializeTitanIndexes(titan);
         createFramed(titan);
         fireListeners();
@@ -101,7 +100,7 @@ public class GraphContextImpl implements GraphContext
 
     public GraphContextImpl load()
     {
-        TitanGraph titan = initializeTitanGraph();
+        TitanGraph titan = initializeTitanGraph(false);
         createFramed(titan);
         fireListeners();
         return this;
@@ -303,14 +302,13 @@ public class GraphContextImpl implements GraphContext
         return propertyKey;
     }
 
-    private TitanGraph initializeTitanGraph()
+    private TitanGraph initializeTitanGraph(boolean clear)
     {
         LOG.fine("Initializing graph.");
 
         Path lucene = graphDir.resolve("graphsearch");
         Path berkeley = graphDir.resolve("titangraph");
 
-        // TODO: Externalize this.
         conf = new BaseConfiguration();
         // Sets a unique id in order to fix WINDUP-697. This causes Titan to not attempt to generate and ID,
         // as the Titan id generation code fails on machines with broken network configurations.
@@ -367,7 +365,15 @@ public class GraphContextImpl implements GraphContext
         conf.setProperty("index.search.directory", lucene.toAbsolutePath().toString());
 
         writeToPropertiesFile(conf, graphDir.resolve("TitanConfiguration.properties").toFile());
-        return TitanFactory.open(conf);
+        TitanGraph titanGraph = TitanFactory.open(conf);
+        if (clear)
+        {
+            titanGraph.shutdown();
+            TitanCleanup.clear(titanGraph);
+        }
+        titanGraph = TitanFactory.open(conf);
+
+        return titanGraph;
     }
 
     public Configuration getConfiguration()
