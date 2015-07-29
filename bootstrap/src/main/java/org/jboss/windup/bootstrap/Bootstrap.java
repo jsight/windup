@@ -350,6 +350,8 @@ public class Bootstrap
     {
         if (furnace != null && !furnace.getStatus().isStopped())
             furnace.stop();
+
+        System.exit(0);
     }
 
     private List<Command> processArguments(List<String> arguments)

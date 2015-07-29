@@ -19,10 +19,15 @@
             <artifactId>windup-graph-api</artifactId>
             <scope>provided</scope>
         </dependency>
-		
+
         <dependency>
             <groupId>com.thinkaurelius.titan</groupId>
             <artifactId>titan-berkeleyje</artifactId>
+            <version>${version.titangraph}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.thinkaurelius.titan</groupId>
+            <artifactId>titan-cassandra</artifactId>
             <version>${version.titangraph}</version>
         </dependency>
         <dependency>

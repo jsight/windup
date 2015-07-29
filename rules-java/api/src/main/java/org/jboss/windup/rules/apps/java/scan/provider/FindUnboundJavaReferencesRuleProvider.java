@@ -56,6 +56,7 @@ public class FindUnboundJavaReferencesRuleProvider extends AbstractRuleProvider
 
     private class AttachHintOperation extends GraphOperation
     {
+        // @formatter:off
         @Override
         public void perform(GraphRewrite event, EvaluationContext context)
         {
@@ -103,5 +104,6 @@ public class FindUnboundJavaReferencesRuleProvider extends AbstractRuleProvider
                 }
             }
         }
+        // @formatter:on
     }
 }

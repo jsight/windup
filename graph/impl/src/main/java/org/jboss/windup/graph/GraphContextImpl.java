@@ -1,7 +1,10 @@
 package org.jboss.windup.graph;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,11 +15,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.forge.furnace.Furnace;
@@ -28,6 +33,7 @@ import org.jboss.windup.graph.listeners.BeforeGraphCloseListener;
 import org.jboss.windup.graph.model.WindupFrame;
 import org.jboss.windup.graph.model.WindupVertexFrame;
 import org.jboss.windup.graph.service.GraphService;
+import org.jboss.windup.util.exception.WindupException;
 
 import com.sleepycat.je.LockMode;
 import com.thinkaurelius.titan.core.Cardinality;
@@ -62,8 +68,9 @@ public class GraphContextImpl implements GraphContext
     private final Path graphDir;
     private final GraphApiCompositeClassLoaderProvider classLoaderProvider;
     /**
-     * Used to save all the {@link BeforeGraphCloseListener}s that are also {@link AfterGraphInitializationListener}. This is due a need to call
-     * {@link BeforeGraphCloseListener#beforeGraphClose()} on the same instance on which
+     * Used to save all the {@link BeforeGraphCloseListener}s that are also {@link AfterGraphInitializationListener}.
+     *
+     * This is due a need to call {@link BeforeGraphCloseListener#beforeGraphClose()} on the same instance on which
      * {@link AfterGraphInitializationListener#afterGraphStarted(Map, GraphContext)} } was called
      */
     private final Map<String, BeforeGraphCloseListener> beforeGraphCloseListenerBuffer = new HashMap<>();
@@ -305,12 +312,29 @@ public class GraphContextImpl implements GraphContext
 
         // TODO: Externalize this.
         conf = new BaseConfiguration();
-
         // Sets a unique id in order to fix WINDUP-697. This causes Titan to not attempt to generate and ID,
         // as the Titan id generation code fails on machines with broken network configurations.
         conf.setProperty("graph.unique-instance-id", "windup_" + System.nanoTime() + "_" + RandomStringUtils.randomAlphabetic(6));
-        conf.setProperty("storage.directory", berkeley.toAbsolutePath().toString());
-        conf.setProperty("storage.backend", "berkeleyje");
+        // conf.setProperty("storage.backend", "cassandra");
+        // conf.setProperty("storage.hostname", "127.0.0.1");
+        // conf.setProperty("storage.directory", berkeley.toAbsolutePath().toString());
+        try
+        {
+            Files.createDirectories(berkeley);
+            String cassandraYAML = IOUtils.toString(GraphContextImpl.class.getResource("/cassandra_template.yaml"));
+            cassandraYAML = cassandraYAML.replace("GRAPH_DIR", berkeley.normalize().toAbsolutePath().toString());
+            File cassandraConfigPath = berkeley.resolve("cassandra.yaml").toFile();
+            try (FileWriter fw = new FileWriter(cassandraConfigPath))
+            {
+                fw.write(cassandraYAML);
+            }
+            conf.setProperty("storage.backend", "embeddedcassandra");
+            conf.setProperty("storage.conf-file", cassandraConfigPath.getAbsolutePath());
+        }
+        catch (IOException e)
+        {
+            throw new WindupException("Error writing cassnadra configuration due to: " + e.getMessage(), e);
+        }
 
         // Sets the berkeley cache to a relatively small value to reduce the memory footprint.
         // This is actually more important than performance on some of the smaller machines out there, and
@@ -381,6 +405,7 @@ public class GraphContextImpl implements GraphContext
             LOG.warning("Could not call before shutdown listeners during close due to: " + e.getMessage());
         }
         this.eventGraph.getBaseGraph().shutdown();
+        CassandraDaemon.stop(new String[0]);
     }
 
     @Override
