@@ -18,7 +18,7 @@ public interface EffortReportModel extends WindupVertexFrame
     String TYPE = "EffortReportModel";
     String TYPE_PREFIX = TYPE + ":";
     String EFFORT = "EffortReportModelEffort"; // don't use the prefix as we can't name the index with an "_"
-    String SEVERITY = TYPE_PREFIX + TYPE_PREFIX + "severity";
+    String SEVERITY = TYPE_PREFIX + "severity";
 
     /**
      * Set the effort weight (E.g. How difficult is it to fix the issue?)
