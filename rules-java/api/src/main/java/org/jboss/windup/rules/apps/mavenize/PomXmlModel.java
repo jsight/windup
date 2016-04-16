@@ -15,9 +15,9 @@ import org.jboss.windup.rules.apps.java.model.project.MavenProjectModel;
 public interface PomXmlModel extends WindupVertexFrame
 {
     String TYPE = "PomXml";
-    String DEPENDENCY = TYPE + "_dependency";
-    String PARENT = TYPE + "_parent";
-    String BOM = TYPE + "_bom";
+    String DEPENDS = TYPE + "-dependensOn";
+    String PARENT = TYPE + "-parent";
+    String BOM = TYPE + "-bom";
 
     @Adjacency(label = PARENT, direction = Direction.OUT)
     ArchiveCoordinateModel getParent();
@@ -31,12 +31,12 @@ public interface PomXmlModel extends WindupVertexFrame
     @Adjacency(label = BOM, direction = Direction.OUT)
     void setBom(ArchiveCoordinateModel bom);
 
-    @Adjacency(label = DEPENDENCY, direction = Direction.OUT)
+    @Adjacency(label = DEPENDS, direction = Direction.OUT)
     Iterable<ArchiveCoordinateModel> getDependencies();
 
-    @Adjacency(label = DEPENDENCY, direction = Direction.OUT)
+    @Adjacency(label = DEPENDS, direction = Direction.OUT)
     void setDependencies(Iterable<ArchiveCoordinateModel> deps);
 
-    @Adjacency(label = DEPENDENCY, direction = Direction.OUT)
+    @Adjacency(label = DEPENDS, direction = Direction.OUT)
     void addDependency(ArchiveCoordinateModel dependency);
 }
