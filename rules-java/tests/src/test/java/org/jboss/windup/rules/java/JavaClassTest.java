@@ -38,6 +38,7 @@ import org.jboss.windup.rules.apps.java.config.ScanPackagesOption;
 import org.jboss.windup.rules.apps.java.config.SourceModeOption;
 import org.jboss.windup.rules.apps.java.scan.ast.JavaTypeReferenceModel;
 import org.jboss.windup.rules.apps.java.scan.provider.AnalyzeJavaFilesRuleProvider;
+import org.jboss.windup.testutil.basics.WindupTestUtilMethods;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +74,7 @@ public class JavaClassTest
     @Test
     public void testJavaClassCondition() throws IOException, InstantiationException, IllegalAccessException
     {
-        try (GraphContext context = factory.create(getDefaultPath()))
+        try (GraphContext context = factory.create(WindupTestUtilMethods.getTempDirectoryForGraph()))
         {
             final String inputDir = "src/test/resources/org/jboss/windup/rules/java";
 
@@ -137,7 +138,7 @@ public class JavaClassTest
         Assert.assertEquals("output", as.getOutputVariablesName());
     }
 
-    private Path getDefaultPath()
+    private static Path getDefaultPath()
     {
         return FileUtils.getTempDirectory().toPath().resolve("Windup")
                     .resolve("windupgraph_javaclasstest_" + RandomStringUtils.randomAlphanumeric(6));
