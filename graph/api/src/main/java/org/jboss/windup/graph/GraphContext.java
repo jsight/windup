@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.nio.file.Path;
 import java.util.Map;
 
+import com.tinkerpop.blueprints.util.wrappers.partition.PartitionGraph;
 import org.jboss.windup.graph.frames.TypeAwareFramedGraphQuery;
 
 import com.thinkaurelius.titan.core.TitanGraph;
@@ -25,7 +26,7 @@ public interface GraphContext extends Closeable
     /**
      * Get the underlying {@link EventGraph}, which is itself a wrapper for a {@link TitanGraph}.
      */
-    EventGraph<TitanGraph> getGraph();
+    PartitionGraph<EventGraph<TitanGraph>> getGraph();
     
     /**
      * Creates new graph using the configuration. In case there was already a graph located in the specified path, it will be deleted.
@@ -42,7 +43,7 @@ public interface GraphContext extends Closeable
     /**
      * Get the {@link FramedGraph} view of the underlying {@link EventGraph}.
      */
-    FramedGraph<EventGraph<TitanGraph>> getFramed();
+    FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> getFramed();
 
     /**
      * Get the {@link GraphTypeManager}.

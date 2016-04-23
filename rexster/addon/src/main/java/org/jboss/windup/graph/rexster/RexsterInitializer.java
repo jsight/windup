@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.tinkerpop.blueprints.util.wrappers.partition.PartitionGraph;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.jboss.forge.furnace.addons.Addon;
 import org.jboss.forge.furnace.container.simple.lifecycle.SimpleContainer;
@@ -54,7 +55,7 @@ public class RexsterInitializer implements AfterGraphInitializationListener, Bef
         return null;
     }
 
-    public void start(FramedGraph<EventGraph<TitanGraph>> graph)
+    public void start(FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> graph)
     {
         try (PrintWriter out = new PrintWriter("rexster.xml"))
         {

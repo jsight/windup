@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.tinkerpop.blueprints.util.wrappers.partition.PartitionGraph;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.forge.arquillian.AddonDependencies;
@@ -115,7 +116,7 @@ public class IterationAutomicCommitTest
 
             RuleSubset.create(configuration).perform(event, evaluationContext);
 
-            CommitInterceptingTitanGraph titanGraph = (CommitInterceptingTitanGraph) context.getGraph().getBaseGraph();
+            CommitInterceptingTitanGraph titanGraph = (CommitInterceptingTitanGraph) context.getGraph().getBaseGraph().getBaseGraph();
             Assert.assertEquals(1, titanGraph.commitCount);
 
             // Now create a few hundred FileModels to see if autocommit happens periodically
@@ -449,6 +450,19 @@ public class IterationAutomicCommitTest
         }
     }
 
+    private class CommitInterceptingPartitionGraph extends PartitionGraph<EventGraph<TitanGraph>>
+    {
+        public CommitInterceptingPartitionGraph(EventGraph<TitanGraph> baseGraph, String partitionKey, String writePartition, Set<String> readPartitions)
+        {
+            super(baseGraph, partitionKey, writePartition, readPartitions);
+        }
+
+        public CommitInterceptingPartitionGraph(EventGraph<TitanGraph> baseGraph, String partitionKey, String readWritePartition)
+        {
+            super(baseGraph, partitionKey, readWritePartition);
+        }
+    }
+
     private class CommitInterceptingEventGraph extends EventGraph<TitanGraph>
     {
         private CommitInterceptingTitanGraph commitInterceptingTitanGraph;
@@ -469,12 +483,14 @@ public class IterationAutomicCommitTest
     private class CommitInterceptingGraphContext implements GraphContext
     {
         private GraphContext delegate;
+        private CommitInterceptingPartitionGraph commitInterceptingPartitionGraph;
         private CommitInterceptingEventGraph commitInterceptingEventGraph;
 
         public CommitInterceptingGraphContext(GraphContext delegate)
         {
             this.delegate = delegate;
-            this.commitInterceptingEventGraph = new CommitInterceptingEventGraph(delegate.getGraph().getBaseGraph());
+            this.commitInterceptingEventGraph = new CommitInterceptingEventGraph(delegate.getGraph().getBaseGraph().getBaseGraph());
+            this.commitInterceptingPartitionGraph = new CommitInterceptingPartitionGraph(commitInterceptingEventGraph, "", "");
         }
 
         @Override
@@ -484,9 +500,9 @@ public class IterationAutomicCommitTest
         }
 
         @Override
-        public EventGraph<TitanGraph> getGraph()
+        public PartitionGraph<EventGraph<TitanGraph>> getGraph()
         {
-            return commitInterceptingEventGraph;
+            return commitInterceptingPartitionGraph;
         }
 
         @Override
@@ -502,7 +518,7 @@ public class IterationAutomicCommitTest
         }
 
         @Override
-        public FramedGraph<EventGraph<TitanGraph>> getFramed()
+        public FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> getFramed()
         {
             return delegate.getFramed();
         }

@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -11,6 +12,11 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.thinkaurelius.titan.core.attribute.Text;
+import com.tinkerpop.blueprints.Contains;
+import com.tinkerpop.blueprints.Query;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.wrappers.partition.PartitionVertex;
 import org.apache.commons.io.FileUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -36,10 +42,12 @@ import org.jboss.windup.exec.rulefilters.NotPredicate;
 import org.jboss.windup.exec.rulefilters.RuleProviderPhasePredicate;
 import org.jboss.windup.graph.GraphContext;
 import org.jboss.windup.graph.GraphContextFactory;
+import org.jboss.windup.graph.service.GraphService;
 import org.jboss.windup.reporting.model.InlineHintModel;
 import org.jboss.windup.reporting.service.InlineHintService;
 import org.jboss.windup.rules.apps.java.condition.JavaClass;
 import org.jboss.windup.rules.apps.java.config.SourceModeOption;
+import org.jboss.windup.rules.apps.java.scan.ast.JavaTypeReferenceModel;
 import org.jboss.windup.rules.apps.java.scan.provider.AnalyzeJavaFilesRuleProvider;
 import org.jboss.windup.rules.files.condition.FileContent;
 import org.jboss.windup.rules.files.model.FileLocationModel;
@@ -182,6 +190,21 @@ public class FileContentTest
                 }
             }
             Assert.assertTrue(foundFile3Needle);
+
+            for (JavaTypeReferenceModel typeReferenceModel : new GraphService<JavaTypeReferenceModel>(context, JavaTypeReferenceModel.class).findAll())
+            {
+                System.out.println("Java Type Reference: " + typeReferenceModel.getResolvedSourceSnippit());
+                System.out.println("Partition: " + ((PartitionVertex)typeReferenceModel.asVertex()).getPartition());
+            }
+
+            Query q = context.getGraph().getBaseGraph().query();
+            //q.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, "\"java.io.IOException\"");
+            q.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, "\\Qjava.io.IOException\\E");
+            q.has("wk", "w");
+            for (Vertex v : q.vertices())
+            {
+                System.out.println("Query result: " + v.getId() + " partition: " + v.getProperty("wk"));
+            }
 
             Assert.assertEquals(1, provider.count);
         }

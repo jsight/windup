@@ -9,6 +9,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.tinkerpop.blueprints.util.wrappers.partition.PartitionVertex;
 import org.jboss.forge.furnace.Furnace;
 import org.jboss.forge.furnace.container.simple.lifecycle.SimpleContainer;
 import org.jboss.windup.graph.model.WindupVertexFrame;
@@ -228,7 +229,10 @@ public class GraphTypeManager implements TypeResolver, FrameInitializer
 
     private static StandardVertex asTitanVertex(Element e)
     {
-        if (e instanceof StandardVertex)
+        if (e instanceof PartitionVertex)
+        {
+            return asTitanVertex(((PartitionVertex)e).getBaseVertex());
+        } else  if (e instanceof StandardVertex)
         {
             return (StandardVertex) e;
         }

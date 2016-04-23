@@ -48,7 +48,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
             @Override
             public Void execute()
             {
-                getGraphContext().getGraph().getBaseGraph().commit();
+                getGraphContext().getGraph().getBaseGraph().getBaseGraph().commit();
                 return null;
             }
         });
@@ -323,7 +323,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
     @Override
     public TitanTransaction newTransaction()
     {
-        return context.getGraph().getBaseGraph().newTransaction();
+        return context.getGraph().getBaseGraph().getBaseGraph().newTransaction();
     }
 
     /**

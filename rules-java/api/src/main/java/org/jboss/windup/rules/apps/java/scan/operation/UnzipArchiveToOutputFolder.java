@@ -206,7 +206,7 @@ public class UnzipArchiveToOutputFolder extends AbstractIterationOperation<Archi
                     numberAdded++;
                     if (numberAdded % 250 == 0)
                     {
-                        event.getGraphContext().getGraph().getBaseGraph().commit();
+                        event.getGraphContext().getGraph().getBaseGraph().getBaseGraph().commit();
                     }
 
                     if (subFile.isFile() && ZipUtil.endsWithZipExtension(subFileModel.getFilePath()))

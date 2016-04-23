@@ -102,7 +102,7 @@ public class JavaClassTest
             fileModel.setProjectModel(pm);
             pm.addFileModel(fileModel);
 
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
 
             final WindupConfiguration processorConfig = new WindupConfiguration();
             processorConfig.setRuleProviderFilter(new RuleProviderWithDependenciesPredicate(

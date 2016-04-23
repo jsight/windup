@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.tinkerpop.blueprints.util.wrappers.partition.PartitionGraph;
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -50,12 +51,16 @@ public class GraphContextImpl implements GraphContext
 {
     private static final Logger log = Logger.getLogger(GraphContextImpl.class.getName());
 
+    private static final String PARTITION_KEY = "wk";
+    private static final String DEFAULT_PARTITION = "w";
+
     private final Furnace furnace;
     private Map<String, Object> configurationOptions;
     private final GraphTypeManager graphTypeManager;
+    private PartitionGraph<EventGraph<TitanGraph>> partitionGraph;
     private EventGraph<TitanGraph> eventGraph;
     private BatchGraph<TitanGraph> batchGraph;
-    private FramedGraph<EventGraph<TitanGraph>> framed;
+    private FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> framed;
     private Configuration conf;
 
     private final Path graphDir;
@@ -160,8 +165,9 @@ public class GraphContextImpl implements GraphContext
                     graphTypeManager.build(),     // Adds detected WindupVertexFrame/Model classes
                     new GremlinGroovyModule() // Supports @Gremlin
         );
+        this.partitionGraph = new PartitionGraph<EventGraph<TitanGraph>>(eventGraph, PARTITION_KEY, DEFAULT_PARTITION);
 
-        framed = factory.create(eventGraph);
+        framed = factory.create(this.partitionGraph);
     }
 
     private void initializeTitanIndexes(TitanGraph titanGraph)
@@ -347,9 +353,9 @@ public class GraphContextImpl implements GraphContext
     }
 
     @Override
-    public EventGraph<TitanGraph> getGraph()
+    public PartitionGraph<EventGraph<TitanGraph>> getGraph()
     {
-        return eventGraph;
+        return partitionGraph;
     }
 
     /**
@@ -363,7 +369,7 @@ public class GraphContextImpl implements GraphContext
     }
 
     @Override
-    public FramedGraph<EventGraph<TitanGraph>> getFramed()
+    public FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> getFramed()
     {
         return framed;
     }

@@ -296,7 +296,7 @@ public class RuleSubset extends DefaultOperationBuilder implements CompositeOper
                         autocommit = (Boolean) ruleContext.get(RuleMetadataType.AUTO_COMMIT);
 
                     if (autocommit)
-                        event.getGraphContext().getGraph().getBaseGraph().commit();
+                        event.getGraphContext().getGraph().getBaseGraph().getBaseGraph().commit();
 
                     Variables.instance(event).pop();
 

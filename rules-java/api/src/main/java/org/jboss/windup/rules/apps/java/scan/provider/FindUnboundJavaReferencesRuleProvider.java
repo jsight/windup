@@ -97,7 +97,7 @@ public class FindUnboundJavaReferencesRuleProvider extends AbstractRuleProvider
                 count++;
                 if (count % 1000 == 0)
                 {
-                    event.getGraphContext().getGraph().getBaseGraph().commit();
+                    event.getGraphContext().getGraph().getBaseGraph().getBaseGraph().commit();
                 }
             }
         }

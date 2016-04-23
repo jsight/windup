@@ -210,7 +210,8 @@ public class JavaClass extends ParameterizedGraphCondition implements JavaClassB
             {
                 GremlinPipeline<Vertex, Vertex> resolvedTextSearch = new GremlinPipeline<>(event.getGraphContext().getGraph());
                 resolvedTextSearch.V();
-                resolvedTextSearch.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, titanify(compiledPattern));
+                //resolvedTextSearch.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, titanify(compiledPattern));
+                resolvedTextSearch.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, compiledPattern.pattern());
                 // resolvedTextSearch.has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, JavaTypeReferenceModel.TYPE);
 
                 if (!resolvedTextSearch.iterator().hasNext())

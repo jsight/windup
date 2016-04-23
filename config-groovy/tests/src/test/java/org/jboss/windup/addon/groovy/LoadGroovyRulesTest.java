@@ -109,7 +109,7 @@ public class LoadGroovyRulesTest
             Assert.assertTrue("Script path should have been set in Rule Metatada", foundRuleOrigin);
             Assert.assertTrue("Script path should have been set in Rule Provider Metatada", foundRuleProviderOrigin);
             Assert.assertTrue(allProviders.size() > 0);
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
         }
     }
 

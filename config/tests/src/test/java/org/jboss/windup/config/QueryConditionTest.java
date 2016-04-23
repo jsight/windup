@@ -227,7 +227,7 @@ public class QueryConditionTest
         {
 
             fillData(context);
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
 
             // setup the context for the rules
             GraphRewrite event = new GraphRewrite(context);
@@ -251,7 +251,7 @@ public class QueryConditionTest
         {
 
             fillData(context);
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
 
             // setup the context for the rules
             GraphRewrite event = new GraphRewrite(context);
@@ -283,7 +283,7 @@ public class QueryConditionTest
         {
 
             fillData(context);
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
 
             // setup the context for the rules
             GraphRewrite event = new GraphRewrite(context);
@@ -307,7 +307,7 @@ public class QueryConditionTest
         try (final GraphContext context = factory.create(folder))
         {
             fillData(context);
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
 
             // setup the context for the rules
             GraphRewrite event = new GraphRewrite(context);
@@ -337,7 +337,7 @@ public class QueryConditionTest
             WindupVertexFrame bothTypesFrame = context.getFramed().addVertex(null, TestSomeModel.class);
             bothTypesFrame = GraphService.addTypeToModel(context, bothTypesFrame, TestXmlMetaFacetModel.class);
 
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
 
             Variables variables = Variables.instance(event);
             variables.push();
@@ -382,7 +382,7 @@ public class QueryConditionTest
             WindupVertexFrame bothTypesFrame = context.getFramed().addVertex(null, TestSomeModel.class);
             bothTypesFrame = GraphService.addTypeToModel(context, bothTypesFrame, TestXmlMetaFacetModel.class);
 
-            context.getGraph().getBaseGraph().commit();
+            context.getGraph().getBaseGraph().getBaseGraph().commit();
 
             Variables variables = Variables.instance(event);
             variables.push();

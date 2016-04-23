@@ -297,7 +297,7 @@ public class AnalyzeJavaFilesRuleProvider extends AbstractRuleProvider
         private void commitIfNeeded(GraphContext context, int numberAddedToGraph)
         {
             if (numberAddedToGraph % COMMIT_INTERVAL == 0)
-                context.getGraph().getBaseGraph().commit();
+                context.getGraph().getBaseGraph().getBaseGraph().commit();
         }
 
         private void printProgressEstimate(GraphRewrite event, ProgressEstimate estimate)
