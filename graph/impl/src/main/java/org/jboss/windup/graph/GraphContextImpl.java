@@ -57,10 +57,10 @@ public class GraphContextImpl implements GraphContext
     private final Furnace furnace;
     private Map<String, Object> configurationOptions;
     private final GraphTypeManager graphTypeManager;
-    private PartitionGraph<EventGraph<TitanGraph>> partitionGraph;
-    private EventGraph<TitanGraph> eventGraph;
+    private PartitionGraph<TitanGraph> partitionGraph;
+    private EventGraph<PartitionGraph<TitanGraph>> eventGraph;
     private BatchGraph<TitanGraph> batchGraph;
-    private FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> framed;
+    private FramedGraph<EventGraph<PartitionGraph<TitanGraph>>> framed;
     private Configuration conf;
 
     private final Path graphDir;
@@ -128,7 +128,8 @@ public class GraphContextImpl implements GraphContext
 
     private void createFramed(TitanGraph titanGraph)
     {
-        this.eventGraph = new EventGraph<>(titanGraph);
+        this.partitionGraph = new PartitionGraph<>(titanGraph, PARTITION_KEY, DEFAULT_PARTITION);
+        this.eventGraph = new EventGraph<>(partitionGraph);
         this.batchGraph = new BatchGraph<>(titanGraph, 1000L);
 
         final ClassLoader compositeClassLoader = classLoaderProvider.getCompositeClassLoader();
@@ -165,9 +166,8 @@ public class GraphContextImpl implements GraphContext
                     graphTypeManager.build(),     // Adds detected WindupVertexFrame/Model classes
                     new GremlinGroovyModule() // Supports @Gremlin
         );
-        this.partitionGraph = new PartitionGraph<EventGraph<TitanGraph>>(eventGraph, PARTITION_KEY, DEFAULT_PARTITION);
 
-        framed = factory.create(this.partitionGraph);
+        framed = factory.create(this.eventGraph);
     }
 
     private void initializeTitanIndexes(TitanGraph titanGraph)
@@ -346,16 +346,16 @@ public class GraphContextImpl implements GraphContext
             return;
         if (this.eventGraph.getBaseGraph() == null)
             return;
-        if (this.eventGraph.getBaseGraph().isOpen())
+        if (this.eventGraph.getBaseGraph().getBaseGraph().isOpen())
             close();
 
-        TitanCleanup.clear(this.eventGraph.getBaseGraph());
+        TitanCleanup.clear(this.eventGraph.getBaseGraph().getBaseGraph());
     }
 
     @Override
-    public PartitionGraph<EventGraph<TitanGraph>> getGraph()
+    public EventGraph<PartitionGraph<TitanGraph>> getGraph()
     {
-        return partitionGraph;
+        return eventGraph;
     }
 
     /**
@@ -369,7 +369,7 @@ public class GraphContextImpl implements GraphContext
     }
 
     @Override
-    public FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> getFramed()
+    public FramedGraph<EventGraph<PartitionGraph<TitanGraph>>> getFramed()
     {
         return framed;
     }

@@ -450,47 +450,43 @@ public class IterationAutomicCommitTest
         }
     }
 
-    private class CommitInterceptingPartitionGraph extends PartitionGraph<EventGraph<TitanGraph>>
-    {
-        public CommitInterceptingPartitionGraph(EventGraph<TitanGraph> baseGraph, String partitionKey, String writePartition, Set<String> readPartitions)
-        {
-            super(baseGraph, partitionKey, writePartition, readPartitions);
-        }
-
-        public CommitInterceptingPartitionGraph(EventGraph<TitanGraph> baseGraph, String partitionKey, String readWritePartition)
-        {
-            super(baseGraph, partitionKey, readWritePartition);
-        }
-    }
-
-    private class CommitInterceptingEventGraph extends EventGraph<TitanGraph>
+    private class CommitInterceptingPartitionGraph extends PartitionGraph<TitanGraph>
     {
         private CommitInterceptingTitanGraph commitInterceptingTitanGraph;
 
-        public CommitInterceptingEventGraph(TitanGraph baseGraph)
+        public CommitInterceptingPartitionGraph(TitanGraph baseGraph, String partitionKey, String readWritePartition)
+        {
+            super(baseGraph, partitionKey, readWritePartition);
+            this.commitInterceptingTitanGraph = new CommitInterceptingTitanGraph(baseGraph);
+        }
+    }
+
+    private class CommitInterceptingEventGraph extends EventGraph<PartitionGraph<TitanGraph>>
+    {
+        CommitInterceptingPartitionGraph commitInterceptingPartitionGraph;
+
+        public CommitInterceptingEventGraph(PartitionGraph<TitanGraph> baseGraph)
         {
             super(baseGraph);
-            this.commitInterceptingTitanGraph = new CommitInterceptingTitanGraph(baseGraph);
+            this.commitInterceptingPartitionGraph = new CommitInterceptingPartitionGraph(baseGraph.getBaseGraph(), "", "'");
         }
 
         @Override
-        public TitanGraph getBaseGraph()
+        public PartitionGraph<TitanGraph> getBaseGraph()
         {
-            return commitInterceptingTitanGraph;
+            return commitInterceptingPartitionGraph;
         }
     }
 
     private class CommitInterceptingGraphContext implements GraphContext
     {
         private GraphContext delegate;
-        private CommitInterceptingPartitionGraph commitInterceptingPartitionGraph;
         private CommitInterceptingEventGraph commitInterceptingEventGraph;
 
         public CommitInterceptingGraphContext(GraphContext delegate)
         {
             this.delegate = delegate;
-            this.commitInterceptingEventGraph = new CommitInterceptingEventGraph(delegate.getGraph().getBaseGraph().getBaseGraph());
-            this.commitInterceptingPartitionGraph = new CommitInterceptingPartitionGraph(commitInterceptingEventGraph, "", "");
+            this.commitInterceptingEventGraph = new CommitInterceptingEventGraph(delegate.getGraph().getBaseGraph());
         }
 
         @Override
@@ -500,9 +496,9 @@ public class IterationAutomicCommitTest
         }
 
         @Override
-        public PartitionGraph<EventGraph<TitanGraph>> getGraph()
+        public EventGraph<PartitionGraph<TitanGraph>> getGraph()
         {
-            return commitInterceptingPartitionGraph;
+            return commitInterceptingEventGraph;
         }
 
         @Override
@@ -518,7 +514,7 @@ public class IterationAutomicCommitTest
         }
 
         @Override
-        public FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> getFramed()
+        public FramedGraph<EventGraph<PartitionGraph<TitanGraph>>> getFramed()
         {
             return delegate.getFramed();
         }

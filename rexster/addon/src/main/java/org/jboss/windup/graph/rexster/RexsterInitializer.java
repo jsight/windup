@@ -55,7 +55,7 @@ public class RexsterInitializer implements AfterGraphInitializationListener, Bef
         return null;
     }
 
-    public void start(FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> graph)
+    public void start(FramedGraph<EventGraph<PartitionGraph<TitanGraph>>> graph)
     {
         try (PrintWriter out = new PrintWriter("rexster.xml"))
         {

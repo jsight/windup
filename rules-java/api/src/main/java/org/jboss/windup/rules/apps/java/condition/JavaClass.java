@@ -23,6 +23,7 @@ import org.jboss.windup.config.query.QueryGremlinCriterion;
 import org.jboss.windup.config.query.QueryPropertyComparisonType;
 import org.jboss.windup.graph.model.WindupVertexFrame;
 import org.jboss.windup.graph.model.resource.FileModel;
+import org.jboss.windup.graph.service.GraphService;
 import org.jboss.windup.rules.apps.java.model.AbstractJavaSourceModel;
 import org.jboss.windup.rules.apps.java.model.JavaClassFileModel;
 import org.jboss.windup.rules.apps.java.model.JavaClassModel;
@@ -181,16 +182,17 @@ public class JavaClass extends ParameterizedGraphCondition implements JavaClassB
         {
             ExecutionStatistics.get().begin("JavaClass.evaluate");
 
+            final GraphService<JavaTypeReferenceModel> javaTypeReferenceService = new GraphService<>(event.getGraphContext(), JavaTypeReferenceModel.class);
+
             final ParameterStore store = DefaultParameterStore.getInstance(context);
             final Pattern compiledPattern = referencePattern.getCompiledPattern(store);
 
             /*
              * Only set in the case of a query with no "from" variable.
              */
-            String initialQueryID = null;
+            String initialQueryID = "iqi." + UUID.randomUUID().toString();
 
             QueryBuilderFrom query;
-            initialQueryID = "iqi." + UUID.randomUUID().toString();
 
             //prepare initialQueryID
             if (!StringUtils.isBlank(getInputVariablesName()))
@@ -208,10 +210,10 @@ public class JavaClass extends ParameterizedGraphCondition implements JavaClassB
             }
             else
             {
-                GremlinPipeline<Vertex, Vertex> resolvedTextSearch = new GremlinPipeline<>(event.getGraphContext().getGraph());
+                GremlinPipeline<Vertex, Vertex> resolvedTextSearch = new GremlinPipeline<>(event.getGraphContext().getGraph().getBaseGraph().getBaseGraph());
                 resolvedTextSearch.V();
-                //resolvedTextSearch.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, titanify(compiledPattern));
-                resolvedTextSearch.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, compiledPattern.pattern());
+                resolvedTextSearch.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, titanify(compiledPattern));
+                //resolvedTextSearch.has(JavaTypeReferenceModel.RESOLVED_SOURCE_SNIPPIT, Text.REGEX, compiledPattern.pattern());
                 // resolvedTextSearch.has(WindupVertexFrame.TYPE_PROP, Text.CONTAINS, JavaTypeReferenceModel.TYPE);
 
                 if (!resolvedTextSearch.iterator().hasNext())
@@ -246,6 +248,8 @@ public class JavaClass extends ParameterizedGraphCondition implements JavaClassB
                 Iterable<? extends WindupVertexFrame> frames = Variables.instance(event).findVariable(uuid);
                 for (WindupVertexFrame frame : frames)
                 {
+                    frame = javaTypeReferenceService.getById(frame.asVertex().getId());
+
                     FileModel fileModel = ((FileReferenceModel) frame).getFile();
                     Iterable<JavaClassModel> javaClasses = null;
                     if (fileModel instanceof AbstractJavaSourceModel)
@@ -280,8 +284,7 @@ public class JavaClass extends ParameterizedGraphCondition implements JavaClassB
                     }
                 }
                 Variables.instance(event).removeVariable(uuid);
-                if (initialQueryID != null)
-                    Variables.instance(event).removeVariable(initialQueryID);
+                Variables.instance(event).removeVariable(initialQueryID);
 
                 setResults(event, getVarname(), results);
                 return !results.isEmpty();

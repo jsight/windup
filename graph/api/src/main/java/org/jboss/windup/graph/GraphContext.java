@@ -26,7 +26,7 @@ public interface GraphContext extends Closeable
     /**
      * Get the underlying {@link EventGraph}, which is itself a wrapper for a {@link TitanGraph}.
      */
-    PartitionGraph<EventGraph<TitanGraph>> getGraph();
+    EventGraph<PartitionGraph<TitanGraph>> getGraph();
     
     /**
      * Creates new graph using the configuration. In case there was already a graph located in the specified path, it will be deleted.
@@ -43,7 +43,7 @@ public interface GraphContext extends Closeable
     /**
      * Get the {@link FramedGraph} view of the underlying {@link EventGraph}.
      */
-    FramedGraph<PartitionGraph<EventGraph<TitanGraph>>> getFramed();
+    FramedGraph<EventGraph<PartitionGraph<TitanGraph>>> getFramed();
 
     /**
      * Get the {@link GraphTypeManager}.

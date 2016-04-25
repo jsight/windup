@@ -16,6 +16,7 @@ import com.thinkaurelius.titan.core.attribute.Text;
 import com.tinkerpop.blueprints.Contains;
 import com.tinkerpop.blueprints.Query;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.wrappers.event.EventVertex;
 import com.tinkerpop.blueprints.util.wrappers.partition.PartitionVertex;
 import org.apache.commons.io.FileUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -194,7 +195,9 @@ public class FileContentTest
             for (JavaTypeReferenceModel typeReferenceModel : new GraphService<JavaTypeReferenceModel>(context, JavaTypeReferenceModel.class).findAll())
             {
                 System.out.println("Java Type Reference: " + typeReferenceModel.getResolvedSourceSnippit());
-                System.out.println("Partition: " + ((PartitionVertex)typeReferenceModel.asVertex()).getPartition());
+                EventVertex eventVertex = (EventVertex)typeReferenceModel.asVertex();
+                PartitionVertex partitionVertex = (PartitionVertex)eventVertex.getBaseVertex();
+                System.out.println("Partition: " + partitionVertex.getPartition());
             }
 
             Query q = context.getGraph().getBaseGraph().query();

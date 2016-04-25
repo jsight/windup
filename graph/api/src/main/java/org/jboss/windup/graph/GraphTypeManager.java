@@ -238,7 +238,7 @@ public class GraphTypeManager implements TypeResolver, FrameInitializer
         }
         else if (e instanceof EventVertex)
         {
-            return (StandardVertex) ((EventVertex) e).getBaseVertex();
+            return asTitanVertex(((EventVertex) e).getBaseVertex());
         }
         else
         {

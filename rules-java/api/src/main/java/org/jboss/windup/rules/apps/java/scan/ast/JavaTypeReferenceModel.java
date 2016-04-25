@@ -39,7 +39,7 @@ public interface JavaTypeReferenceModel extends FileLocationModel
      * Gets the snippit referenced by this {@link FileLocationModel}.
      */
     @Property(RESOLVED_SOURCE_SNIPPIT)
-    //@Indexed(IndexType.SEARCH)
+    @Indexed(IndexType.SEARCH)
     void setResolvedSourceSnippit(String source);
 
     /**
