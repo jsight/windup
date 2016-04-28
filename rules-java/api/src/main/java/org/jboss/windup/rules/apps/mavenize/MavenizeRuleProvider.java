@@ -48,7 +48,7 @@ import org.ocpsoft.rewrite.context.EvaluationContext;
 public class MavenizeRuleProvider extends AbstractRuleProvider
 {
     private static final Logger LOG = Logging.get(MavenizeRuleProvider.class);
-    public static final MavenCoords JBOSS_PARENT = new MavenCoords("org.jboss", "jboss-parent", "20");
+    public static final MavenCoord JBOSS_PARENT = new MavenCoord("org.jboss", "jboss-parent", "20");
 
     // @formatter:off
     @Override
@@ -141,7 +141,7 @@ public class MavenizeRuleProvider extends AbstractRuleProvider
     }
 
 
-    private static void copyTo(MavenCoords from, ArchiveCoordinateModel to)
+    private static void copyTo(MavenCoord from, ArchiveCoordinateModel to)
     {
         to.setArtifactId(from.getArtifactId());
         to.setGroupId(from.getGroupId());

@@ -3,13 +3,16 @@ package org.jboss.windup.rules.apps.mavenize;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
+import static org.jboss.windup.maven.nexusindexer.BomBasedArtifactFilterFactory.REGEX_GAVCP;
 import org.jboss.windup.rules.apps.java.archives.model.ArchiveCoordinateModel;
 
 /**
  * A POJO for Maven coordinate. A counterpart for ArchiveCoordinateModel.
  */
-public class MavenCoords
+public class MavenCoord
 {
     private String groupId;
     private String artifactId;
@@ -20,16 +23,16 @@ public class MavenCoords
     // This should not really be here, but for the simplicity, I keep it here.
     private String scope;
     private String comment;
-    private Set<MavenCoords> exclusions = new HashSet<>();
+    private Set<MavenCoord> exclusions = new HashSet<>();
 
 
-    MavenCoords()
+    MavenCoord()
     {
     }
 
 
     @Deprecated
-    MavenCoords(ArchiveCoordinateModel coordinate)
+    MavenCoord(ArchiveCoordinateModel coordinate)
     {
         this.groupId = coordinate.getGroupId();
         this.artifactId = coordinate.getArtifactId();
@@ -38,9 +41,9 @@ public class MavenCoords
         this.packaging = coordinate.getPackaging();
     }
 
-    static MavenCoords from(ArchiveCoordinateModel coordinate)
+    static MavenCoord from(ArchiveCoordinateModel coordinate)
     {
-        return new MavenCoords()
+        return new MavenCoord()
         .setGroupId(coordinate.getGroupId())
         .setArtifactId(coordinate.getArtifactId())
         .setVersion(coordinate.getVersion())
@@ -48,19 +51,35 @@ public class MavenCoords
         .setPackaging(coordinate.getPackaging());
     }
 
-    MavenCoords(String groupId, String artifactId, String version)
+    public static final Pattern REGEX_GAVCP = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)(:[^: ]+)?(:[^: ]+)?");
+
+    public static MavenCoord fromGAVPC(String coordGavpc)
+    {
+        Matcher mat = REGEX_GAVCP.matcher(coordGavpc);
+        if (!mat.matches())
+            throw new IllegalArgumentException("Wrong Maven coordinates format, must be G:A:V[:P[:C]] . " + coordGavpc);
+
+        return new MavenCoord()
+        .setGroupId(mat.group(1))
+        .setArtifactId(mat.group(2))
+        .setVersion(mat.group(3))
+        .setPackaging(mat.group(4))
+        .setClassifier(mat.group(5));
+    }
+
+    MavenCoord(String groupId, String artifactId, String version)
     {
         this(groupId, artifactId, version, "pom");
     }
 
 
-    MavenCoords(String groupId, String artifactId, String version, String packaging)
+    MavenCoord(String groupId, String artifactId, String version, String packaging)
     {
         this(groupId, artifactId, version, null, packaging);
     }
 
 
-    MavenCoords(String groupId, String artifactId, String version, String classifier, String packaging)
+    MavenCoord(String groupId, String artifactId, String version, String classifier, String packaging)
     {
         this.groupId = groupId;
         this.artifactId = artifactId;
@@ -94,7 +113,7 @@ public class MavenCoords
             return false;
         if (getClass() != obj.getClass())
             return false;
-        final MavenCoords other = (MavenCoords) obj;
+        final MavenCoord other = (MavenCoord) obj;
         if (!Objects.equals(this.groupId, other.groupId))
             return false;
         if (!Objects.equals(this.artifactId, other.artifactId))
@@ -115,7 +134,7 @@ public class MavenCoords
     }
 
 
-    public MavenCoords setGroupId(String groupId)
+    public MavenCoord setGroupId(String groupId)
     {
         this.groupId = groupId;
         return this;
@@ -128,7 +147,7 @@ public class MavenCoords
     }
 
 
-    public MavenCoords setArtifactId(String artifactId)
+    public MavenCoord setArtifactId(String artifactId)
     {
         this.artifactId = artifactId;
         return this;
@@ -141,7 +160,7 @@ public class MavenCoords
     }
 
 
-    public MavenCoords setVersion(String version)
+    public MavenCoord setVersion(String version)
     {
         this.version = version;
         return this;
@@ -154,7 +173,7 @@ public class MavenCoords
     }
 
 
-    public MavenCoords setClassifier(String classifier)
+    public MavenCoord setClassifier(String classifier)
     {
         this.classifier = classifier;
         return this;
@@ -167,7 +186,7 @@ public class MavenCoords
     }
 
 
-    public MavenCoords setPackaging(String packaging)
+    public MavenCoord setPackaging(String packaging)
     {
         this.packaging = packaging;
         return this;
@@ -180,7 +199,7 @@ public class MavenCoords
     }
 
 
-    public MavenCoords setScope(String scope)
+    public MavenCoord setScope(String scope)
     {
         this.scope = scope;
         return this;
@@ -193,19 +212,19 @@ public class MavenCoords
     }
 
 
-    public MavenCoords setComment(String comment)
+    public MavenCoord setComment(String comment)
     {
         this.comment = comment;
         return this;
     }
 
 
-    public Set<MavenCoords> getExclusions()
+    public Set<MavenCoord> getExclusions()
     {
         return exclusions;
     }
 
-    public MavenCoords addExclusion(MavenCoords coord){
+    public MavenCoord addExclusion(MavenCoord coord){
         this.getExclusions().add(coord);
         return this;
     }

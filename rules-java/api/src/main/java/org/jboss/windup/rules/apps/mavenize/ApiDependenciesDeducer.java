@@ -43,7 +43,7 @@ class ApiDependenciesDeducer
     private void addIndexBasedDependencies(ProjectModel projectModel, Pom modulePom)
     {
         PackagesToContainingMavenArtifactsIndex packageIndex = new PackagesToContainingMavenArtifactsIndex(mavCtx.getGraphContext());
-        for (MavenCoords apiCoords : ApiDependenciesData.API_ARTIFACTS)
+        for (MavenCoord apiCoords : ApiDependenciesData.API_ARTIFACTS)
         {
             if (packageIndex.moduleContainsPackagesFromAPI(projectModel, apiCoords))
                 modulePom.getDependencies().add(apiCoords);
@@ -113,7 +113,7 @@ class ApiDependenciesDeducer
     }
 
 
-    private boolean moduleContainsClassesFromAPI(ProjectModel projectModel, MavenCoords apiCoords)
+    private boolean moduleContainsClassesFromAPI(ProjectModel projectModel, MavenCoord apiCoords)
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

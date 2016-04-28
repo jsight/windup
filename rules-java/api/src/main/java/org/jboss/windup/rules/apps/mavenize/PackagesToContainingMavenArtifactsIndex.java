@@ -50,7 +50,7 @@ public class PackagesToContainingMavenArtifactsIndex
      * register all the classes (or just packages?) from the API jars.
      * This is executed in a separate rule.
      */
-    public void registerPackagesFromAPI(MavenCoords apiCoords)
+    public void registerPackagesFromAPI(MavenCoord apiCoords)
     {
         Iterable<String> packages = this.getPackagesInArtifact(apiCoords);
         for (String pkg : packages)
@@ -64,7 +64,7 @@ public class PackagesToContainingMavenArtifactsIndex
      * we can link the ProjectModel and API packages together.
      * ProjectModel --uses--> ArchiveCoordinateModel
      */
-    public void markProjectsUsingPackagesFromAPI(MavenCoords apiCoords)
+    public void markProjectsUsingPackagesFromAPI(MavenCoord apiCoords)
     {
         final GraphService<ArchiveCoordinateModel> coordsService = graphContext.service(ArchiveCoordinateModel.class);
 
@@ -87,7 +87,7 @@ public class PackagesToContainingMavenArtifactsIndex
      * For given API artifact, finds the projects whose Java classes use artifact's classes,
      * and links them in the graph.
      */
-    public boolean moduleContainsPackagesFromAPI(ProjectModel projectModel, MavenCoords apiCoords)
+    public boolean moduleContainsPackagesFromAPI(ProjectModel projectModel, MavenCoord apiCoords)
     {
         ArchiveCoordinateModel archive = new ArchiveCoordinateService(graphContext, ArchiveCoordinateModel.class).findSingle(apiCoords.getGroupId(), apiCoords.getArtifactId(), null);
         if (archive == null)
@@ -103,7 +103,7 @@ public class PackagesToContainingMavenArtifactsIndex
         return false;
     }
 
-    private Iterable<String> getPackagesInArtifact(MavenCoords apiCoords)
+    private Iterable<String> getPackagesInArtifact(MavenCoord apiCoords)
     {
         // TODO: Either take from index, or download and scan (Jandex?).
         return Collections.EMPTY_LIST;

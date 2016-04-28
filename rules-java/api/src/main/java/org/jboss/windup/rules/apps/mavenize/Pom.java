@@ -13,12 +13,12 @@ import org.apache.commons.collections4.map.LinkedMap;
  */
 public class Pom
 {
-    MavenCoords coords = new MavenCoords();
+    MavenCoord coords = new MavenCoord();
     Pom parent;
-    MavenCoords bom;
+    MavenCoord bom;
     String name;
     String description;
-    Set<MavenCoords> dependencies = new LinkedHashSet<>();
+    Set<MavenCoord> dependencies = new LinkedHashSet<>();
     Set<Pom> localDependencies = new LinkedHashSet<>();
     OrderedMap<String, Pom> submodules = new LinkedMap<>();
     boolean root = false;
@@ -40,7 +40,7 @@ public class Pom
     }
 
 
-    Pom(MavenCoords coords){
+    Pom(MavenCoord coords){
         this.coords = coords;
     }
 
@@ -74,11 +74,11 @@ public class Pom
     /**
      * Third-party library dependencies.
      */
-    public Set<MavenCoords> getDependencies(){
+    public Set<MavenCoord> getDependencies(){
         return dependencies;
     }
 
-    public Pom setDependencies(Set<MavenCoords> dependencies){
+    public Pom setDependencies(Set<MavenCoord> dependencies){
         this.dependencies = dependencies;
         return this;
     }
@@ -117,20 +117,20 @@ public class Pom
     }
 
 
-    public MavenCoords getCoords(){
+    public MavenCoord getCoords(){
         return coords;
     }
 
-    public Pom setCoords(MavenCoords coords){
+    public Pom setCoords(MavenCoord coords){
         this.coords = coords;
         return this;
     }
 
-    public MavenCoords getBom(){
+    public MavenCoord getBom(){
         return bom;
     }
 
-    public Pom setBom(MavenCoords bom){
+    public Pom setBom(MavenCoord bom){
         this.bom = bom;
         return this;
     }

@@ -66,7 +66,7 @@ public class MavenizationService
         // 1) create the overall structure - a parent, and a BOM.
 
         // Root pom.xml ( == parent pom.xml in our resulting structure).
-        mavCtx.rootPom = new Pom(new MavenCoords(mavCtx.getUnifiedGroupId(), mavCtx.getUnifiedAppName() + "-parent", mavCtx.getUnifiedVersion()));
+        mavCtx.rootPom = new Pom(new MavenCoord(mavCtx.getUnifiedGroupId(), mavCtx.getUnifiedAppName() + "-parent", mavCtx.getUnifiedVersion()));
         mavCtx.rootPom.role = Pom.ModuleRole.PARENT;
         ///PomXmlModel rootPom = grCtx.service(PomXmlModel.class).create();
         mavCtx.rootPom.parent = new Pom(MavenizeRuleProvider.JBOSS_PARENT);
@@ -75,7 +75,7 @@ public class MavenizationService
         mavCtx.rootPom.root = true;
 
         // BOM
-        Pom bom = new Pom(new MavenCoords(mavCtx.getUnifiedGroupId(), mavCtx.getUnifiedAppName() + "-bom", mavCtx.getUnifiedVersion()));
+        Pom bom = new Pom(new MavenCoord(mavCtx.getUnifiedGroupId(), mavCtx.getUnifiedAppName() + "-bom", mavCtx.getUnifiedVersion()));
         bom.role = Pom.ModuleRole.BOM;
         bom.parent = new Pom(MavenizeRuleProvider.JBOSS_PARENT);
         bom.description = "Bill of Materials. See https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html";
@@ -86,7 +86,7 @@ public class MavenizationService
         // BOM - dependencyManagement dependencies
         for( ArchiveCoordinateModel dep : grCtx.getUnique(GlobalBomModel.class).getDependencies() ){
             LOG.info("Adding dep to BOM: " + dep.toPrettyString());
-            bom.dependencies.add(new MavenCoords(dep));
+            bom.dependencies.add(new MavenCoord(dep));
         }
 
         // 2) Recursively add the modules.
@@ -122,11 +122,11 @@ public class MavenizationService
             else if(containingModule == null)
                 LOG.warning("containingModule is null."); // IllegalStateEx?
             else
-                containingModule.dependencies.add(MavenCoords.from(idArch.getCoordinate()));
+                containingModule.dependencies.add(MavenCoord.from(idArch.getCoordinate()));
             return null;
         }
 
-        MavenCoords modulePomCoords = new MavenCoords();
+        MavenCoord modulePomCoords = new MavenCoord();
         modulePomCoords.setGroupId(mavCtx.getUnifiedGroupId());
         modulePomCoords.setVersion(mavCtx.getUnifiedVersion());
         final String artifactId = normalizeDirName(projectModel.getName());
@@ -156,7 +156,7 @@ public class MavenizationService
             // Known library -> simple dependency.
             if(file instanceof IdentifiedArchiveModel){
                 IdentifiedArchiveModel artifact = (IdentifiedArchiveModel) file;
-                modulePom.dependencies.add(new MavenCoords(artifact.getCoordinate()));
+                modulePom.dependencies.add(new MavenCoord(artifact.getCoordinate()));
             }
             // Unknown archives -> nested modules? -> local dependencies.
             else {

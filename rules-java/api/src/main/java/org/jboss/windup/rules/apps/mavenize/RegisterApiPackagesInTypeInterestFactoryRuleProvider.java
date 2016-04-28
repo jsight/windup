@@ -32,7 +32,7 @@ public class RegisterApiPackagesInTypeInterestFactoryRuleProvider extends Abstra
         {
             public void perform(Rewrite event, EvaluationContext context)
             {
-                for (MavenCoords apiCoords : ApiDependenciesData.API_ARTIFACTS) /// TODO: Get this form the index.
+                for (MavenCoord apiCoords : ApiDependenciesData.API_ARTIFACTS) /// TODO: Get this form the index.
                 {
                     packageIndex.registerPackagesFromAPI(apiCoords);
                 }
@@ -41,7 +41,7 @@ public class RegisterApiPackagesInTypeInterestFactoryRuleProvider extends Abstra
         {
             public void perform(Rewrite event, EvaluationContext context)
             {
-                for (MavenCoords apiCoords : ApiDependenciesData.API_ARTIFACTS)
+                for (MavenCoord apiCoords : ApiDependenciesData.API_ARTIFACTS)
                 {
                     packageIndex.markProjectsUsingPackagesFromAPI(apiCoords);
                 }
