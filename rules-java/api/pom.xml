@@ -40,6 +40,8 @@
             <groupId>org.jboss.windup.maven</groupId>
             <artifactId>nexus-indexer-data</artifactId>
             <version>6-SNAPSHOT</version>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
