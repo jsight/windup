@@ -1,5 +1,8 @@
 package org.jboss.windup.ast.java.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Contains a name that has been referenced by the Java source file. This can include the qualified name (for example, com.example.data.Foo) as well
  * as information about the reference. Information includes indicating where the reference was found within the file (line, column, and length) as
@@ -19,7 +22,11 @@ public class ClassReference
     private final int column;
     private final int length;
     private final TypeReferenceLocation location;
-    private String line;
+    private final String line;
+
+    private ClassReference superclassReference;
+    private final List<ClassReference> interfaces = new ArrayList<>();
+    private final List<ClassReference> children = new ArrayList<>();
 
     /**
      * Creates the {@link ClassReference} with the given qualfiedName, location, lineNumber, column, and length.
@@ -40,20 +47,27 @@ public class ClassReference
         this.line = line;
     }
 
+    public void setSuperclassReference(ClassReference superClass)
+    {
+        this.superclassReference = superClass;
+    }
+
+    public void addChildReference(ClassReference reference)
+    {
+        this.children.add(reference);
+    }
+
+    public void addInterface(ClassReference iface)
+    {
+        this.interfaces.add(iface);
+    }
+
     /**
      * Contains the raw text represented by this reference (class names are not resolved).
      */
     public String getLine()
     {
         return line;
-    }
-
-    /**
-     * Contains the raw text represented by this reference (class names are not resolved).
-     */
-    public void setLine(String line)
-    {
-        this.line = line;
     }
 
     /**

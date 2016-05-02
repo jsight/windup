@@ -258,4 +258,18 @@ public class JavaASTReferenceResolverTest extends AbstractJavaASTTest
                 new ClassReference("otherpackage.NotOnLibraryPath", "otherpackage", "NotOnLibraryPath", null, ResolutionStatus.RECOVERED, TypeReferenceLocation.INHERITANCE,
                         5, 0, 94, "public class UnavailableSuperclass extends NotOnLibraryPath {")));
     }
+
+    @Test
+    public void testBasicMultipleTypes()
+    {
+        List<ClassReference> references = ASTProcessor.analyze(getLibraryPaths(), getSourcePaths(),
+                Paths.get("src/test/resources/testclasses/basic/multipletypes/BasicMultipleTypes.java"));
+
+        Assert.assertTrue(references.contains(
+                new ClassReference("testclasses.basic.multipletypes.BasicMultipleTypes", "testclasses.basic.multipletypes", "BasicMultipleTypes", null, ResolutionStatus.RESOLVED, TypeReferenceLocation.TYPE,
+                        3, 0, 100, "public class BasicMultipleTypes {")));
+        Assert.assertTrue(references.contains(
+                new ClassReference("testclasses.basic.multipletypes.OtherType", "testclasses.basic.multipletypes", "OtherType", null, ResolutionStatus.RESOLVED, TypeReferenceLocation.TYPE,
+                        7, 0, 100, "class OtherType {")));
+    }
 }
