@@ -72,8 +72,8 @@ public class ReferenceResolvingVisitor extends ASTVisitor
     private final String path;
     private final CompilationUnit compilationUnit;
 
-    private ClassReference currentType;
-    private ClassReference currentMethod;
+    private final Stack<ClassReference> currentTypes = new Stack<>();
+    private final Stack<ClassReference> currentMethods = new Stack<>();
 
     private final List<ClassReference> classReferences = new ArrayList<>();
     private final ReferenceResolvingVisitorState state;
@@ -178,6 +178,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
             packageName = PackageAndClassName.parseFromQualifiedName(sourceString).packageName;
 
         final String className = type.getName();
+
         return processTypeAsString(sourceString, packageName, className, resolutionStatus, referenceLocation, lineNumber, columnNumber, length, line);
     }
 
@@ -227,6 +228,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
     @Override
     public boolean visit(MethodDeclaration node)
     {
+        System.out.println("Visit method declr: " + node.getName());
         // register method return type
         final ResolutionStatus resolutionStatus;
         IMethodBinding resolveBinding = node.resolveBinding();
@@ -292,9 +294,9 @@ public class ReferenceResolvingVisitor extends ASTVisitor
         ClassReference methodReference = processMethod(methodCall, resolutionStatus, TypeReferenceLocation.METHOD, compilationUnit.getLineNumber(node.getName().getStartPosition()),
                     compilationUnit.getColumnNumber(node.getName().getStartPosition()), node.getName().getLength(),
                     extractDefinitionLine(node.toString()));
-        this.currentMethod = methodReference;
+        this.currentMethods.push(methodReference);
         processModifiers(methodReference, node.modifiers());
-        this.currentType.addChildReference(currentMethod);
+        this.currentTypes.peek().addChildReference(methodReference);
         return super.visit(node);
     }
 
@@ -304,7 +306,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
         Type type = node.getRightOperand();
         ClassReference reference = processType(type, TypeReferenceLocation.INSTANCE_OF, compilationUnit.getLineNumber(node.getStartPosition()),
                     compilationUnit.getColumnNumber(type.getStartPosition()), type.getLength(), node.toString());
-        currentMethod.addChildReference(reference);
+        currentMethods.peek().addChildReference(reference);
 
         return super.visit(node);
     }
@@ -317,7 +319,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
             Type type = cic.getType();
             ClassReference reference = processType(type, TypeReferenceLocation.THROW_STATEMENT, compilationUnit.getLineNumber(node.getStartPosition()),
                         compilationUnit.getColumnNumber(cic.getStartPosition()), cic.getLength(), node.toString());
-            currentMethod.addChildReference(reference);
+            currentMethods.peek().addChildReference(reference);
         }
 
         return super.visit(node);
@@ -328,7 +330,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
         Type catchType = node.getException().getType();
         ClassReference reference = processType(catchType, TypeReferenceLocation.CATCH_EXCEPTION_STATEMENT, compilationUnit.getLineNumber(node.getStartPosition()),
                     compilationUnit.getColumnNumber(catchType.getStartPosition()), catchType.getLength(), node.toString());
-        currentMethod.addChildReference(reference);
+        currentMethods.peek().addChildReference(reference);
 
         return super.visit(node);
     }
@@ -336,39 +338,15 @@ public class ReferenceResolvingVisitor extends ASTVisitor
     @Override
     public boolean visit(ReturnStatement node)
     {
-        if (node.getExpression() instanceof ClassInstanceCreation)
-        {
-            ClassInstanceCreation cic = (ClassInstanceCreation) node.getExpression();
-            ITypeBinding typeBinding = cic.getType().resolveBinding();
-            if (typeBinding == null)
-            {
-                String qualifiedClass = cic.getType().toString();
-                ResolveClassnameResult result = resolveClassname(qualifiedClass);
-                qualifiedClass = result.result;
-                ResolutionStatus resolutionStatus = result.found ? ResolutionStatus.RECOVERED : ResolutionStatus.UNRESOLVED;
-                PackageAndClassName packageAndClassName = PackageAndClassName.parseFromQualifiedName(qualifiedClass);
-
-                ClassReference reference = processTypeAsString(qualifiedClass, packageAndClassName.packageName, packageAndClassName.className, resolutionStatus,
-                            TypeReferenceLocation.CONSTRUCTOR_CALL,
-                            compilationUnit.getLineNumber(node.getStartPosition()),
-                            compilationUnit.getColumnNumber(cic.getStartPosition()), cic.getLength(), node.toString());
-                currentMethod.addChildReference(reference);
-            }
-            else
-            {
-                ClassReference reference = processTypeBinding(typeBinding, ResolutionStatus.RESOLVED, TypeReferenceLocation.CONSTRUCTOR_CALL,
-                            compilationUnit.getLineNumber(node.getStartPosition()),
-                            compilationUnit.getColumnNumber(cic.getStartPosition()), cic.getLength(), node.toString());
-                currentMethod.addChildReference(reference);
-            }
-        }
         return super.visit(node);
     }
 
     @Override
-    public boolean visit(AnonymousClassDeclaration node)
+    public void endVisit(AnonymousClassDeclaration node)
     {
-        return super.visit(node);
+        System.out.println("END Anonymous class declaration: " + node);
+        this.currentTypes.pop();
+        super.endVisit(node);
     }
 
     @Override
@@ -432,7 +410,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
                         compilationUnit.getColumnNumber(node.getStartPosition()), node.getLength(), node.toString());
             }
             processModifiers(reference, node.modifiers());
-            currentType.addChildReference(reference);
+            currentTypes.peek().addChildReference(reference);
         }
         return true;
     }
@@ -660,8 +638,25 @@ public class ReferenceResolvingVisitor extends ASTVisitor
         }
     }
 
+    @Override
+    public void endVisit(TypeDeclaration node)
+    {
+        System.out.println("End typedeclr visit: " + node.getName().toString());
+        currentTypes.pop();
+        super.endVisit(node);
+    }
+
+    @Override
+    public void endVisit(MethodDeclaration node)
+    {
+        System.out.println("End methoddeclr visit: " + node.getName().toString());
+        currentMethods.pop();
+        super.endVisit(node);
+    }
+
     public boolean visit(TypeDeclaration typeDeclaration)
     {
+        System.out.println("Visit typedeclr visit: " + typeDeclaration.getName().toString());
         Object clzInterfaces = typeDeclaration.getStructuralProperty(TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
         Object clzSuperClasses = typeDeclaration.getStructuralProperty(TypeDeclaration.SUPERCLASS_TYPE_PROPERTY);
 
@@ -687,7 +682,13 @@ public class ReferenceResolvingVisitor extends ASTVisitor
                 compilationUnit.getColumnNumber(compilationUnit.getStartPosition()),
                 compilationUnit.getLength(), extractDefinitionLine(typeLine));
         classReferences.add(mainTypeClassReference);
-        this.currentType = mainTypeClassReference;
+
+        if (!this.currentMethods.isEmpty())
+            this.currentMethods.peek().addChildReference(mainTypeClassReference);
+        else if (!this.currentTypes.isEmpty())
+            this.currentTypes.peek().addChildReference(mainTypeClassReference);
+
+        this.currentTypes.push(mainTypeClassReference);
         processModifiers(mainTypeClassReference, typeDeclaration.modifiers());
 
         state.getNames().add("this");
@@ -724,7 +725,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
                                         compilationUnit.getLineNumber(typeDeclaration.getStartPosition()),
                                         compilationUnit.getColumnNumber(typeDeclaration.getStartPosition()),
                                         typeDeclaration.getLength(), extractDefinitionLine(typeDeclaration.toString()));
-                            currentType.addInterface(interfaceReference);
+                            currentTypes.peek().addInterface(interfaceReference);
                         }
                         else
                         {
@@ -740,7 +741,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
                                             compilationUnit.getLineNumber(typeDeclaration.getStartPosition()),
                                             compilationUnit.getColumnNumber(typeDeclaration.getStartPosition()), typeDeclaration.getLength(),
                                             extractDefinitionLine(typeDeclaration.toString()));
-                                currentType.addInterface(interfaceReference);
+                                currentTypes.peek().addInterface(interfaceReference);
 
                                 if (resolvedSuperInterface != null)
                                 {
@@ -761,7 +762,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
         {
             if (clzSuperClasses instanceof SimpleType)
             {
-                ClassReference lastSubClass = this.currentType;
+                ClassReference lastSubClass = this.currentTypes.peek();
 
                 ITypeBinding resolvedSuperClass = ((SimpleType) clzSuperClasses).resolveBinding();
 
@@ -793,7 +794,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
                     ClassReference superClassReference = processTypeBinding(resolvedSuperClass, ResolutionStatus.RESOLVED, TypeReferenceLocation.INHERITANCE,
                                 compilationUnit.getLineNumber(typeDeclaration.getStartPosition()),
                                 compilationUnit.getColumnNumber(typeDeclaration.getStartPosition()), typeDeclaration.getLength(), extractDefinitionLine(typeDeclaration.toString()));
-                    classReferences.add(new ClassReference(resolvedSuperClass.toString(), resolvedSuperClass.getPackage().toString(), resolvedSuperClass.getName(), null,
+                    classReferences.add(new ClassReference(resolvedSuperClass.getQualifiedName(), resolvedSuperClass.getPackage().toString(), resolvedSuperClass.getName(), null,
                             ResolutionStatus.RESOLVED,
                             TypeReferenceLocation.TYPE, compilationUnit.getLineNumber(typeDeclaration.getStartPosition()),
                             compilationUnit.getColumnNumber(compilationUnit.getStartPosition()),
@@ -806,7 +807,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
                                     compilationUnit.getLineNumber(typeDeclaration.getStartPosition()),
                                     compilationUnit.getColumnNumber(typeDeclaration.getStartPosition()), typeDeclaration.getLength(),
                                     extractDefinitionLine(typeDeclaration.toString()));
-                        currentType.addInterface(interfaceReference);
+                        currentTypes.peek().addInterface(interfaceReference);
                     }
 
                     lastSubClass.setSuperclassReference(superClassReference);
@@ -835,7 +836,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
         ClassReference reference = processType(node.getType(), TypeReferenceLocation.VARIABLE_DECLARATION,
                     compilationUnit.getLineNumber(node.getStartPosition()),
                     compilationUnit.getColumnNumber(node.getStartPosition()), node.getLength(), node.toString());
-        currentMethod.addChildReference(reference);
+        currentMethods.peek().addChildReference(reference);
         return super.visit(node);
     }
 
@@ -876,6 +877,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
      */
     public boolean visit(MethodInvocation node)
     {
+        System.out.println("Visit method invocation: " + node.getName());
         if (!StringUtils.contains(node.toString(), "."))
         {
             // it must be a local method. ignore.
@@ -969,7 +971,7 @@ public class ReferenceResolvingVisitor extends ASTVisitor
             ClassReference reference = processMethod(methodCall, resolutionStatus, TypeReferenceLocation.METHOD_CALL,
                         compilationUnit.getLineNumber(node.getName().getStartPosition()),
                         compilationUnit.getColumnNumber(node.getName().getStartPosition()), node.getName().getLength(), node.toString());
-            currentMethod.addChildReference(reference);
+            currentMethods.peek().addChildReference(reference);
         }
 
         return super.visit(node);
@@ -1059,11 +1061,31 @@ public class ReferenceResolvingVisitor extends ASTVisitor
         }
 
         ConstructorType resolvedConstructor = new ConstructorType(qualifiedClass, constructorMethodQualifiedArguments);
+
         ClassReference reference = processConstructor(resolvedConstructor, resolutionStatus, compilationUnit.getLineNumber(node.getType().getStartPosition()),
                     compilationUnit.getColumnNumber(node.getType().getStartPosition()), node.getType().getLength(), node.toString());
 
-        if (this.currentMethod != null)
-            this.currentMethod.addChildReference(reference);
+        this.currentMethods.peek().addChildReference(reference);
+
+        if (node.getAnonymousClassDeclaration() != null)
+        {
+            AnonymousClassDeclaration anonymousClassDeclaration = node.getAnonymousClassDeclaration();
+            PackageAndClassName packageAndClassName = PackageAndClassName.parseFromQualifiedName(qualifiedClass);
+            ClassReference classReference = processTypeAsString(qualifiedClass, packageAndClassName.packageName, packageAndClassName.className, resolutionStatus,
+                    TypeReferenceLocation.TYPE,
+                    compilationUnit.getLineNumber(anonymousClassDeclaration.getStartPosition()),
+                    compilationUnit.getColumnNumber(node.getType().getStartPosition()),
+                    node.getType().getLength(),
+                    node.toString());
+            classReferences.add(classReference);
+
+            if (!this.currentMethods.isEmpty())
+                this.currentMethods.peek().addChildReference(classReference);
+            else
+                this.currentTypes.peek().addChildReference(classReference);
+
+            this.currentTypes.push(classReference);
+        }
 
         return super.visit(node);
     }

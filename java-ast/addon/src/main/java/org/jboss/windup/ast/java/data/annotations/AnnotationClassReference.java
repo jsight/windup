@@ -27,6 +27,8 @@ public class AnnotationClassReference extends ClassReference implements Annotati
     {
         super(qualifiedName, packageName, className, null, resolutionStatus, TypeReferenceLocation.ANNOTATION, lineNumber, column, length, line);
         this.originalReference = originalReference;
+        if (originalReference != null)
+            originalReference.addAnnotation(this);
     }
 
     /**

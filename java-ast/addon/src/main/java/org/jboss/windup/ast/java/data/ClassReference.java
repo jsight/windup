@@ -1,5 +1,9 @@
 package org.jboss.windup.ast.java.data;
 
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.forge.furnace.util.OperatingSystemUtils;
+import org.jboss.windup.ast.java.data.annotations.AnnotationClassReference;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +31,7 @@ public class ClassReference
     private ClassReference superclassReference;
     private final List<ClassReference> interfaces = new ArrayList<>();
     private final List<ClassReference> children = new ArrayList<>();
+    private final List<AnnotationClassReference> annotations = new ArrayList<>();
 
     /**
      * Creates the {@link ClassReference} with the given qualfiedName, location, lineNumber, column, and length.
@@ -45,6 +50,11 @@ public class ClassReference
         this.column = column;
         this.length = length;
         this.line = line;
+    }
+
+    public void addAnnotation(AnnotationClassReference annotation)
+    {
+        this.annotations.add(annotation);
     }
 
     public void setSuperclassReference(ClassReference superClass)
@@ -191,5 +201,37 @@ public class ClassReference
                     ", location=" + location +
                     ", line='" + line + '\'' +
                     '}';
+    }
+
+    public String serializeToString(int indentLevel)
+    {
+        StringBuilder builder = new StringBuilder();
+        String indent = StringUtils.repeat(" ", indentLevel * 4);
+
+        builder.append(indent);
+        builder.append("Qualified Name:").append(qualifiedName).append(", ").append(location).append(", line: ").append(lineNumber);
+
+        if (!this.annotations.isEmpty())
+        {
+            builder.append(OperatingSystemUtils.getLineSeparator());
+            for (AnnotationClassReference annotation : this.annotations)
+            {
+                builder.append(indent);
+                builder.append("Annotation:");
+                builder.append(annotation.toString());
+            }
+        }
+
+        if (!this.children.isEmpty())
+        {
+            builder.append(OperatingSystemUtils.getLineSeparator());
+            for (ClassReference child : this.children)
+            {
+                builder.append(child.serializeToString(indentLevel + 1));
+            }
+        }
+
+        builder.append(OperatingSystemUtils.getLineSeparator());
+        return builder.toString();
     }
 }
