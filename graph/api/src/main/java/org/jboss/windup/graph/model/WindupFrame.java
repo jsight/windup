@@ -1,8 +1,8 @@
 package org.jboss.windup.graph.model;
 
-import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
+import org.apache.tinkerpop.gremlin.structure.Element;
 
 /**
  * @author <a href="mailto:jesse.sightler@gmail.com">Jesse Sightler</a>

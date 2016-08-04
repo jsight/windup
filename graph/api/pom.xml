@@ -18,16 +18,10 @@
             <groupId>com.thinkaurelius.titan</groupId>
             <artifactId>titan-core</artifactId>
             <version>${version.titangraph}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>frames</artifactId>
-                    <groupId>com.tinkerpop</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.windup.graph.frames</groupId>
-            <artifactId>windup-frames</artifactId>
+            <artifactId>frames-tp3</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>guava</artifactId>
@@ -36,13 +30,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.tinkerpop.gremlin</groupId>
-            <artifactId>gremlin-groovy</artifactId>
-            <version>${version.tinkerpop.blueprints}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tinkerpop.blueprints</groupId>
-            <artifactId>blueprints-graph-sail</artifactId>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-core</artifactId>
             <version>${version.tinkerpop.blueprints}</version>
         </dependency>
         <dependency>

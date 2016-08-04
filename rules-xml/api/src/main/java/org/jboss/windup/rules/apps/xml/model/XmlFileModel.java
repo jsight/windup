@@ -10,8 +10,8 @@ import org.jboss.windup.util.exception.WindupException;
 import org.jboss.windup.util.xml.LocationAwareXmlReader;
 import org.w3c.dom.Document;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;

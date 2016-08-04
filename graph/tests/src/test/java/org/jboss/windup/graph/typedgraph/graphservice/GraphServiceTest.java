@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.thinkaurelius.titan.core.attribute.Cmp;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.frames.FramedGraphQuery;
 import com.tinkerpop.frames.modules.typedgraph.TypeValue;
 import java.util.List;

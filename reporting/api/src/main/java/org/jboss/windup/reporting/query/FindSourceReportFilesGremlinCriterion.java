@@ -13,7 +13,7 @@ import org.jboss.windup.reporting.model.TechnologyTagModel;
 import org.jboss.windup.rules.files.model.FileLocationModel;
 
 import com.thinkaurelius.titan.core.attribute.Text;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 
 /**

@@ -3,7 +3,7 @@ package org.jboss.windup.rules.files.model;
 import org.jboss.windup.graph.model.WindupVertexFrame;
 import org.jboss.windup.graph.model.resource.FileModel;
 
-import com.tinkerpop.blueprints.Direction;
+import org.apache.tinkerpop.gremlin.structure.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.typedgraph.TypeValue;
 

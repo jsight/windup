@@ -23,7 +23,7 @@ import org.jboss.windup.rules.files.model.FileReferenceModel;
 
 import com.thinkaurelius.titan.core.attribute.Text;
 import com.tinkerpop.blueprints.Compare;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.frames.structures.FramedVertexIterable;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import java.util.logging.Level;

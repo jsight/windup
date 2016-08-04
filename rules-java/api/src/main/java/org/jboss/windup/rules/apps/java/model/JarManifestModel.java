@@ -5,8 +5,8 @@ import org.jboss.windup.graph.model.ArchiveModel;
 import org.jboss.windup.graph.model.resource.FileModel;
 import org.jboss.windup.graph.model.resource.SourceFileModel;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;

@@ -9,8 +9,8 @@ import org.jboss.windup.graph.service.GraphService;
 import org.jboss.windup.reporting.model.ApplicationReportIndexModel;
 import org.jboss.windup.reporting.model.ApplicationReportModel;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 

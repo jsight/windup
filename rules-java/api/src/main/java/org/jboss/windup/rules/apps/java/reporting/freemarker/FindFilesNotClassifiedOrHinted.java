@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.tinkerpop.blueprints.Direction;
+import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jboss.windup.config.GraphRewrite;
 import org.jboss.windup.graph.GraphContext;
 import org.jboss.windup.graph.model.resource.FileModel;
@@ -19,7 +19,7 @@ import org.jboss.windup.rules.files.model.FileLocationModel;
 import org.jboss.windup.rules.files.model.FileReferenceModel;
 import org.jboss.windup.util.ExecutionStatistics;
 
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import freemarker.ext.beans.StringModel;
 import freemarker.template.TemplateModelException;

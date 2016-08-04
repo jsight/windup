@@ -4,7 +4,7 @@ import org.jboss.windup.graph.IndexType;
 import org.jboss.windup.graph.Indexed;
 import org.jboss.windup.graph.model.WindupVertexFrame;
 
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
