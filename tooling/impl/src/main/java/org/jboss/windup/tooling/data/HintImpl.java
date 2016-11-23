@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import org.jboss.windup.reporting.model.InlineHintModel;
-import org.jboss.windup.reporting.category.IssueCategory;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -104,7 +103,7 @@ public class HintImpl implements Hint
      * This is a hint as to the severity of the problem. This may be used for supplying an icon or glyph in the report to the user.
      */
     @Override
-    @XmlElement(name = "issue-category")
+    @XmlElement(name = "issue-category", type = IssueCategoryImpl.class)
     public IssueCategory getIssueCategory()
     {
         return this.issueCategory;

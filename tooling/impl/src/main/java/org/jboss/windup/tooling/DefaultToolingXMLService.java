@@ -10,6 +10,7 @@ import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
+import org.jboss.windup.tooling.data.IssueCategoryImpl;
 import org.jboss.windup.util.exception.WindupException;
 
 /**
@@ -63,6 +64,7 @@ public class DefaultToolingXMLService implements ToolingXMLService
                     org.jboss.windup.tooling.data.HintImpl.class,
                     org.jboss.windup.tooling.data.LinkImpl.class,
                     org.jboss.windup.tooling.data.QuickfixImpl.class,
-                    org.jboss.windup.tooling.data.ReportLinkImpl.class);
+                    org.jboss.windup.tooling.data.ReportLinkImpl.class,
+                    org.jboss.windup.tooling.data.IssueCategoryImpl.class);
     }
 }

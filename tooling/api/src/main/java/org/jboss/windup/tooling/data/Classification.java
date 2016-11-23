@@ -3,10 +3,6 @@ package org.jboss.windup.tooling.data;
 import java.io.File;
 import java.util.List;
 
-import org.jboss.windup.graph.GraphContext;
-import org.jboss.windup.reporting.model.ClassificationModel;
-import org.jboss.windup.reporting.category.IssueCategory;
-
 /**
  * This is a non-graph dependent analogue to {@link ClassificationModel} suitable for usage after the {@link GraphContext} itself has been closed.
  *

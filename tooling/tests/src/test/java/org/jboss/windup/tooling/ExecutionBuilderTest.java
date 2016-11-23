@@ -25,18 +25,17 @@ import org.jboss.windup.config.GraphRewrite;
 import org.jboss.windup.config.loader.RuleLoaderContext;
 import org.jboss.windup.config.metadata.MetadataBuilder;
 import org.jboss.windup.config.operation.GraphOperation;
-import org.jboss.windup.exec.WindupProgressMonitor;
 import org.jboss.windup.exec.configuration.options.OnlineModeOption;
 import org.jboss.windup.graph.model.WindupConfigurationModel;
 import org.jboss.windup.graph.service.WindupConfigurationService;
 import org.jboss.windup.reporting.config.Hint;
 import org.jboss.windup.reporting.config.Quickfix;
 import org.jboss.windup.reporting.config.classification.Classification;
-import org.jboss.windup.reporting.model.QuickfixType;
 import org.jboss.windup.rules.apps.java.condition.JavaClass;
 import org.jboss.windup.rules.apps.java.config.SourceModeOption;
 import org.jboss.windup.rules.apps.java.model.WindupJavaConfigurationModel;
 import org.jboss.windup.rules.apps.java.service.WindupJavaConfigurationService;
+import org.jboss.windup.tooling.data.QuickfixType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,7 +107,8 @@ public class ExecutionBuilderTest
         Path input = Paths.get("../../test-files/src_example");
         Path output = getDefaultPath();
 
-        ExecutionResults results = executeWindup(input, output, new TestProgressMonitor());
+        TestProgressMonitor progressWithLogging = new TestProgressMonitor();
+        ExecutionResults results = executeWindup(input, output, progressWithLogging);
         Assert.assertNotNull(results.getClassifications());
         Assert.assertNotNull(results.getHints());
         Assert.assertTrue(results.getHints().iterator().hasNext());
@@ -122,26 +122,6 @@ public class ExecutionBuilderTest
         results.serializeToXML(xmlResultsFile);
         Assert.assertTrue(Files.isRegularFile(xmlResultsFile));
         Assert.assertTrue(Files.size(xmlResultsFile) > 100);
-    }
-
-    @Test
-    public void testExecutionBuilderWithLogging()
-    {
-        Assert.assertNotNull(builder);
-        Assert.assertNotNull(testProvider);
-
-        Path input = Paths.get("../../test-files/src_example");
-        Path output = getDefaultPath();
-
-        TestProgressWithLogging progressWithLogging = new TestProgressWithLogging();
-        ExecutionResults results = executeWindup(input, output, progressWithLogging);
-        Assert.assertNotNull(results.getClassifications());
-        Assert.assertNotNull(results.getHints());
-        Assert.assertTrue(results.getHints().iterator().hasNext());
-        checkQuickfixInHints(results.getHints());
-        Assert.assertTrue(results.getClassifications().iterator().hasNext());
-        Assert.assertTrue(testProvider.sourceMode);
-        Assert.assertFalse(testProvider.onlineMode);
         Assert.assertTrue(progressWithLogging.logRecords.size() > 10);
     }
 
@@ -178,7 +158,7 @@ public class ExecutionBuilderTest
         Assert.assertEquals(Iterables.size(resultsOriginal.getReportLinks()), Iterables.size(resultsLater.getReportLinks()));
     }
 
-    private ExecutionResults executeWindup(Path input, Path output, WindupProgressMonitor progressMonitor)
+    private ExecutionResults executeWindup(Path input, Path output, WindupToolingProgressMonitor progressMonitor)
     {
         return builder.begin(Paths.get("."))
                     .setInput(input)
@@ -238,16 +218,23 @@ public class ExecutionBuilderTest
         {
             Quickfix quickfix = new Quickfix();
             quickfix.setName("quickfix1");
-            quickfix.setType(QuickfixType.DELETE_LINE);
+            quickfix.setType(org.jboss.windup.reporting.model.QuickfixType.DELETE_LINE);
             return quickfix;
         }
     }
 
-    private class TestProgressMonitor implements WindupProgressMonitor
+    private class TestProgressMonitor implements WindupToolingProgressMonitor
     {
         private int totalWork;
         private int completed;
         private boolean done;
+        private final List<LogRecord> logRecords = new ArrayList<>();
+
+        @Override
+        public void logMessage(LogRecord logRecord)
+        {
+            logRecords.add(logRecord);
+        }
 
         @Override
         public void beginTask(String name, int totalWork)
@@ -289,17 +276,6 @@ public class ExecutionBuilderTest
         public void worked(int work)
         {
             this.completed = work;
-        }
-    }
-
-    private class TestProgressWithLogging extends TestProgressMonitor implements WindupToolingProgressMonitor
-    {
-        private final List<LogRecord> logRecords = new ArrayList<>();
-
-        @Override
-        public void logMessage(LogRecord logRecord)
-        {
-            logRecords.add(logRecord);
         }
     }
 }

@@ -6,16 +6,18 @@ import org.jboss.windup.reporting.model.QuickfixModel;
 import org.jboss.windup.graph.model.resource.FileModel;
 import org.jboss.windup.reporting.model.ClassificationModel;
 import org.jboss.windup.reporting.model.InlineHintModel;
+import org.jboss.windup.reporting.model.QuickfixType;
 import org.jboss.windup.reporting.model.source.SourceReportModel;
 import org.jboss.windup.reporting.service.ClassificationService;
 import org.jboss.windup.reporting.service.InlineHintService;
 import org.jboss.windup.reporting.service.ReportService;
 import org.jboss.windup.reporting.service.SourceReportService;
-import org.jboss.windup.reporting.category.IssueCategory;
 import org.jboss.windup.tooling.data.Classification;
 import org.jboss.windup.tooling.data.ClassificationImpl;
 import org.jboss.windup.tooling.data.Hint;
 import org.jboss.windup.tooling.data.HintImpl;
+import org.jboss.windup.tooling.data.IssueCategory;
+import org.jboss.windup.tooling.data.IssueCategoryImpl;
 import org.jboss.windup.tooling.data.Link;
 import org.jboss.windup.tooling.data.LinkImpl;
 import org.jboss.windup.tooling.data.Quickfix;
@@ -128,7 +130,7 @@ public class ExecutionResultsImpl implements ExecutionResults
             hint.setFile(hintModel.getFile().asFile());
             hint.setTitle(hintModel.getTitle());
             hint.setHint(hintModel.getHint());
-            hint.setIssueCategory(new IssueCategory(hintModel.getIssueCategory()));
+            hint.setIssueCategory(new IssueCategoryImpl(hintModel.getIssueCategory()));
             hint.setEffort(hintModel.getEffort());
             hint.setColumn(hintModel.getColumnNumber());
             hint.setLineNumber(hintModel.getLineNumber());
@@ -156,7 +158,7 @@ public class ExecutionResultsImpl implements ExecutionResults
                 classification.setDescription(classificationModel.getDescription());
                 classification.setEffort(classificationModel.getEffort());
                 classification.setRuleID(classificationModel.getRuleID());
-                classification.setIssueCategory(new IssueCategory(classificationModel.getIssueCategory()));
+                classification.setIssueCategory(new IssueCategoryImpl(classificationModel.getIssueCategory()));
                 classification.setFile(fileModel.asFile());
 
                 classification.setLinks(asLinks(classificationModel.getLinks()));
@@ -187,7 +189,7 @@ public class ExecutionResultsImpl implements ExecutionResults
         for (QuickfixModel quickfixModel : quickfixModels)
         {
             QuickfixImpl quickfix = new QuickfixImpl();
-            quickfix.setType(quickfixModel.getQuickfixType());
+            quickfix.setType(org.jboss.windup.tooling.data.QuickfixType.valueOf(quickfixModel.getQuickfixType().name()));
             quickfix.setName(quickfixModel.getName());
             quickfix.setNewline(quickfixModel.getNewline());
             quickfix.setReplacement(quickfixModel.getReplacement());

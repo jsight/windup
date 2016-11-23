@@ -46,7 +46,7 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
     private WindupProcessor processor;
 
     private Path windupHome;
-    private WindupProgressMonitor progressMonitor;
+    private WindupToolingProgressMonitor progressMonitor;
     private Path input;
     private Path output;
     private Set<String> ignorePathPatterns = new HashSet<>();
@@ -136,7 +136,7 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
     }
 
     @Override
-    public ExecutionBuilderSetOptions setProgressMonitor(WindupProgressMonitor monitor)
+    public ExecutionBuilderSetOptions setProgressMonitor(WindupToolingProgressMonitor monitor)
     {
         this.progressMonitor = monitor;
         return this;
@@ -201,9 +201,11 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
         {
             throw new WindupException("Failed to configure windup due to: " + e.getMessage(), e);
         }
+        ToolingProgressMonitorAdapter progressMonitorAdapter = new ToolingProgressMonitorAdapter(this.progressMonitor);
+
         windupConfiguration.addInputPath(this.input);
         windupConfiguration.setOutputDirectory(this.output);
-        windupConfiguration.setProgressMonitor(this.progressMonitor);
+        windupConfiguration.setProgressMonitor(progressMonitorAdapter);
         windupConfiguration.setOptionValue(SkipReportsRenderingOption.NAME, skipReportsRendering);
 
         Path graphPath = output.resolve(GraphContextFactory.DEFAULT_GRAPH_SUBDIRECTORY);
@@ -236,9 +238,7 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
                 windupConfiguration.setOptionValue(option.getKey(), option.getValue());
             }
             
-            windupConfiguration
-                        .setProgressMonitor(progressMonitor)
-                        .setGraphContext(graphContext);
+            windupConfiguration.setGraphContext(graphContext);
             
             processor.execute(windupConfiguration);
 

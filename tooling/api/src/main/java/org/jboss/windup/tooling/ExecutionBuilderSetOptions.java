@@ -1,7 +1,5 @@
 package org.jboss.windup.tooling;
 
-import org.jboss.windup.config.ConfigurationOption;
-
 import java.nio.file.Path;
 import java.util.Collection;
 
