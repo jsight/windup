@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.LogRecord;
@@ -158,17 +159,17 @@ public class ExecutionBuilderTest
         Assert.assertEquals(Iterables.size(resultsOriginal.getReportLinks()), Iterables.size(resultsLater.getReportLinks()));
     }
 
-    private ExecutionResults executeWindup(Path input, Path output, WindupToolingProgressMonitor progressMonitor)
+    private ExecutionResults executeWindup(Path input, Path output, WindupToolingProgressMonitor progressMonitor) throws RemoteException
     {
-        return builder.begin(Paths.get("."))
-                    .setInput(input)
-                    .setOutput(output)
-                    .setProgressMonitor(progressMonitor)
-                    .includePackage("org.windup.examples.ejb.messagedriven")
-                    .ignore("\\.class$")
-                    .setOption(SourceModeOption.NAME, true)
-                    .setOption(OnlineModeOption.NAME, false)
-                    .execute();
+        builder.begin(Paths.get(".").toString());
+        builder.setInput(input.toString());
+        builder.setOutput(output.toString());
+        builder.setProgressMonitor(progressMonitor);
+        builder.includePackage("org.windup.examples.ejb.messagedriven");
+        builder.ignore("\\.class$");
+        builder.setOption(SourceModeOption.NAME, true);
+        builder.setOption(OnlineModeOption.NAME, false);
+        return builder.execute();
     }
 
     private Path getDefaultPath()
@@ -230,11 +231,11 @@ public class ExecutionBuilderTest
         private boolean done;
         private final List<LogRecord> logRecords = new ArrayList<>();
 
-        @Override
+        /*@Override
         public void logMessage(LogRecord logRecord)
         {
             logRecords.add(logRecord);
-        }
+        }*/
 
         @Override
         public void beginTask(String name, int totalWork)

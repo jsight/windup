@@ -1,6 +1,6 @@
 package org.jboss.windup.tooling;
 
-import java.util.logging.LogRecord;
+import java.rmi.RemoteException;
 
 import org.jboss.windup.exec.WindupProgressMonitor;
 
@@ -16,51 +16,73 @@ public class ToolingProgressMonitorAdapter implements WindupToolingProgressMonit
         this.delegate = delegate;
     }
 
-    @Override
+    /*@Override
     public void logMessage(LogRecord logRecord)
     {
         this.delegate.logMessage(logRecord);
-    }
+    }*/
 
     @Override
-    public void beginTask(String name, int totalWork)
+    public void beginTask(String name, int totalWork)  
     {
-        this.delegate.beginTask(name, totalWork);
+        try {
+			this.delegate.beginTask(name, totalWork);
+		} catch (RemoteException e) {
+		}
     }
 
     @Override
     public void done()
     {
-        this.delegate.done();
+        try {
+			this.delegate.done();
+		} catch (RemoteException e) {
+		}
     }
 
     @Override
     public boolean isCancelled()
     {
-        return this.delegate.isCancelled();
+        try {
+			return this.delegate.isCancelled();
+		} catch (RemoteException e) {
+			return true;
+		}
     }
 
     @Override
     public void setCancelled(boolean value)
     {
-        this.delegate.setCancelled(value);
+        try {
+			this.delegate.setCancelled(value);
+		} catch (RemoteException e) {
+		}
     }
 
     @Override
     public void setTaskName(String name)
     {
-        this.delegate.setTaskName(name);
+        try {
+			this.delegate.setTaskName(name);
+		} catch (RemoteException e) {
+		}
     }
 
     @Override
     public void subTask(String name)
     {
-        this.delegate.subTask(name);
+        try {
+			this.delegate.subTask(name);
+		} catch (RemoteException e) {
+		}
     }
 
     @Override
     public void worked(int work)
     {
-        this.delegate.worked(work);
+        try {
+			this.delegate.worked(work);
+		} catch (RemoteException e) {
+		}
     }
 }

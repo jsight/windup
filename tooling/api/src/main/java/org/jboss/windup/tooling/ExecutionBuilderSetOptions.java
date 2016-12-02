@@ -1,6 +1,6 @@
 package org.jboss.windup.tooling;
 
-import java.nio.file.Path;
+import java.rmi.RemoteException;
 import java.util.Collection;
 
 /**
@@ -13,56 +13,56 @@ public interface ExecutionBuilderSetOptions
     /**
      * Sets a pattern of file paths to ignore during processing.
      */
-    ExecutionBuilderSetOptions ignore(String ignorePattern);
+	void ignore(String ignorePattern) throws RemoteException;
 
     /**
      * Sets the package name prefixes to scan (the default is to scan all packages).
      */
-    ExecutionBuilderSetOptions includePackage(String includePackagePrefix);
+	void includePackage(String includePackagePrefix) throws RemoteException;
 
     /**
      * Includes the provided list of package prefixes.
      */
-    ExecutionBuilderSetOptions includePackages(Collection<String> includePackagePrefixes);
+	void includePackages(Collection<String> includePackagePrefixes) throws RemoteException;
 
     /**
      * Sets the package name prefixes to ignore.
      */
-    ExecutionBuilderSetOptions excludePackage(String excludePackagePrefix);
+	void excludePackage(String excludePackagePrefix) throws RemoteException;
 
     /**
      * Sets a list of package name prefixes to ignore.
      */
-    ExecutionBuilderSetOptions excludePackages(Collection<String> excludePackagePrefixes);
+	void excludePackages(Collection<String> excludePackagePrefixes) throws RemoteException;
 
     /**
      * Switches the engine to run in source only mode (no decompilation).
      */
-    ExecutionBuilderSetOptions sourceOnlyMode();
+	void sourceOnlyMode() throws RemoteException;
 
     /**
      * Indicates that Windup should not generate reports at the end.
      */
-    ExecutionBuilderSetOptions skipReportGeneration();
+	void skipReportGeneration() throws RemoteException;
 
     /**
      * Adds a custom uer rules path.
      */
-    ExecutionBuilderSetOptions addUserRulesPath(Path rulesPath);
+	void addUserRulesPath(String rulesPath) throws RemoteException;
 
     /**
      * Adds a set of custom uer rules paths.
      */
-    ExecutionBuilderSetOptions addUserRulesPaths(Iterable<Path> rulesPath);
+	void addUserRulesPaths(Iterable<String> rulesPath) throws RemoteException;
 
     /**
      * Sets the option with the specified name to the specified value. Option names can be found in static variables on {@link ConfigurationOption}
      * implementations.
      */
-    ExecutionBuilderSetOptions setOption(String name, Object value);
+	void setOption(String name, Object value) throws RemoteException;
 
     /**
      * Execute windup.
      */
-    ExecutionResults execute();
+    ExecutionResults execute() throws RemoteException;
 }

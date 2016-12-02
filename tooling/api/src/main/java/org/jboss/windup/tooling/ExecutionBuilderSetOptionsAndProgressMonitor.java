@@ -1,5 +1,7 @@
 package org.jboss.windup.tooling;
 
+import java.rmi.RemoteException;
+
 /**
  * Allows setting windup options, including the {@link WindupProgressMonitor}.
  *
@@ -10,31 +12,31 @@ public interface ExecutionBuilderSetOptionsAndProgressMonitor
     /**
      * Sets a pattern of file paths to ignore during processing.
      */
-    ExecutionBuilderSetOptions ignore(String ignorePattern);
+	void ignore(String ignorePattern) throws RemoteException;
 
     /**
      * Sets the package name prefixes to scan (the default is to scan all packages).
      */
-    ExecutionBuilderSetOptions includePackage(String includePackagePrefix);
+	void includePackage(String includePackagePrefix) throws RemoteException;
 
     /**
      * Sets the package name prefixes to ignore.
      */
-    ExecutionBuilderSetOptions excludePackage(String excludePackagePrefix);
+	void excludePackage(String excludePackagePrefix) throws RemoteException;
 
     /**
      * Sets the callback that will be used for monitoring progress.
      */
-    ExecutionBuilderSetOptions setProgressMonitor(WindupToolingProgressMonitor monitor);
+	void setProgressMonitor(WindupToolingProgressMonitor monitor) throws RemoteException;
 
     /**
      * Sets the option with the specified name to the specified value. Option names can be found in static variables on {@link ConfigurationOption}
      * implementations.
      */
-    ExecutionBuilderSetOptions setOption(String name, Object value);
+	void setOption(String name, Object value) throws RemoteException;
 
     /**
      * Execute windup.
      */
-    ExecutionResults execute();
+    ExecutionResults execute() throws RemoteException;
 }

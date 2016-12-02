@@ -2,13 +2,13 @@ package org.jboss.windup.tooling;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import org.jboss.forge.furnace.util.Lists;
 import org.jboss.windup.config.SkipReportsRenderingOption;
 import org.jboss.windup.exec.WindupProcessor;
-import org.jboss.windup.exec.WindupProgressMonitor;
 import org.jboss.windup.exec.configuration.WindupConfiguration;
 import org.jboss.windup.graph.GraphContext;
 import org.jboss.windup.graph.GraphContextFactory;
@@ -33,8 +32,7 @@ import org.jboss.windup.util.exception.WindupException;
 /**
  * @author <a href="mailto:jesse.sightler@gmail.com">Jesse Sightler</a>
  */
-public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderSetInput, ExecutionBuilderSetOutput, ExecutionBuilderSetOptions,
-            ExecutionBuilderSetOptionsAndProgressMonitor
+public class ExecutionBuilderImpl implements ExecutionBuilder
 {
     @Inject
     private GraphContextFactory graphContextFactory;
@@ -44,11 +42,13 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
 
     @Inject
     private WindupProcessor processor;
+    
+    private String myTest;
 
-    private Path windupHome;
+    private String windupHome;
     private WindupToolingProgressMonitor progressMonitor;
-    private Path input;
-    private Path output;
+    private String input;
+    private String output;
     private Set<String> ignorePathPatterns = new HashSet<>();
     private Set<String> includePackagePrefixSet = new HashSet<>();
     private Set<String> excludePackagePrefixSet = new HashSet<>();
@@ -77,121 +77,104 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
     }
 
     @Override
-    public ExecutionBuilderSetInput begin(Path windupHome)
+    public void begin(String windupHome) throws RemoteException
     {
         this.windupHome = windupHome;
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOutput setInput(Path input)
+    public void setInput(String input) throws RemoteException
     {
         this.input = input;
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptionsAndProgressMonitor setOutput(Path output)
+    public void setOutput(String output) throws RemoteException
     {
         this.output = output;
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions ignore(String ignorePattern)
+    public void ignore(String ignorePattern) throws RemoteException
     {
         this.ignorePathPatterns.add(ignorePattern);
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions includePackage(String packagePrefix)
+    public void includePackage(String packagePrefix) throws RemoteException
     {
         this.includePackagePrefixSet.add(packagePrefix);
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions includePackages(Collection<String> includePackagePrefixes)
+    public void includePackages(Collection<String> includePackagePrefixes) throws RemoteException
     {
         if (includePackagePrefixes != null)
             this.includePackagePrefixSet.addAll(includePackagePrefixes);
-
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions excludePackage(String packagePrefix)
+    public void excludePackage(String packagePrefix) throws RemoteException
     {
         this.excludePackagePrefixSet.add(packagePrefix);
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions excludePackages(Collection<String> excludePackagePrefixes)
+    public void excludePackages(Collection<String> excludePackagePrefixes) throws RemoteException
     {
         if (excludePackagePrefixes != null)
             this.excludePackagePrefixSet.addAll(excludePackagePrefixes);
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions setProgressMonitor(WindupToolingProgressMonitor monitor)
+    public void setProgressMonitor(WindupToolingProgressMonitor monitor) throws RemoteException
     {
         this.progressMonitor = monitor;
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions sourceOnlyMode()
+    public void sourceOnlyMode() throws RemoteException
     {
         options.put(SourceModeOption.NAME, true);
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions skipReportGeneration()
+    public void skipReportGeneration() throws RemoteException
     {
         options.put(SkipReportsRenderingOption.NAME, true);
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions addUserRulesPath(Path rulesPath)
+    public void addUserRulesPath(String rulesPath) throws RemoteException
     {
         if (rulesPath == null)
-            return this;
+            return;
 
-        String pathString = rulesPath.normalize().toAbsolutePath().toString();
+        String pathString = Paths.get(rulesPath).normalize().toAbsolutePath().toString();
         this.userRulesPathSet.add(pathString);
-
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions addUserRulesPaths(Iterable<Path> rulesPaths)
+    public void addUserRulesPaths(Iterable<String> rulesPaths) throws RemoteException
     {
         if (rulesPaths == null)
-            return this;
+            return;
 
-        for (Path rulesPath : rulesPaths) {
+        for (String rulesPath : rulesPaths) {
             this.addUserRulesPath(rulesPath);
         }
-
-        return this;
     }
 
     @Override
-    public ExecutionBuilderSetOptions setOption(String name, Object value)
+    public void setOption(String name, Object value) throws RemoteException
     {
         this.options.put(name, value);
-        return this;
     }
 
     @Override
-    public ExecutionResults execute()
+    public ExecutionResults execute() throws RemoteException
     {
-        PathUtil.setWindupHome(this.windupHome);
+        PathUtil.setWindupHome(Paths.get(this.windupHome));
         WindupConfiguration windupConfiguration = new WindupConfiguration();
         try
         {
@@ -203,12 +186,12 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
         }
         ToolingProgressMonitorAdapter progressMonitorAdapter = new ToolingProgressMonitorAdapter(this.progressMonitor);
 
-        windupConfiguration.addInputPath(this.input);
-        windupConfiguration.setOutputDirectory(this.output);
+        windupConfiguration.addInputPath(Paths.get(this.input));
+        windupConfiguration.setOutputDirectory(Paths.get(this.output));
         windupConfiguration.setProgressMonitor(progressMonitorAdapter);
         windupConfiguration.setOptionValue(SkipReportsRenderingOption.NAME, skipReportsRendering);
 
-        Path graphPath = output.resolve(GraphContextFactory.DEFAULT_GRAPH_SUBDIRECTORY);
+        Path graphPath = Paths.get(output).resolve(GraphContextFactory.DEFAULT_GRAPH_SUBDIRECTORY);
 
         Logger globalLogger = Logger.getLogger("");
         WindupProgressLoggingHandler loggingHandler = null;
@@ -251,37 +234,6 @@ public class ExecutionBuilderImpl implements ExecutionBuilder, ExecutionBuilderS
         {
             if (loggingHandler != null)
                 globalLogger.removeHandler(loggingHandler);
-        }
-    }
-
-    private class WindupProgressLoggingHandler extends Handler
-    {
-        private final WindupToolingProgressMonitor monitor;
-
-        public WindupProgressLoggingHandler(WindupToolingProgressMonitor monitor)
-        {
-            this.monitor = monitor;
-        }
-
-        @Override
-        public void publish(LogRecord record)
-        {
-            if (this.monitor == null)
-                return;
-
-            this.monitor.logMessage(record);
-        }
-
-        @Override
-        public void flush()
-        {
-
-        }
-
-        @Override
-        public void close() throws SecurityException
-        {
-
         }
     }
 }

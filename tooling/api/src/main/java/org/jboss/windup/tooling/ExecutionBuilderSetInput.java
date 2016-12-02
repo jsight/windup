@@ -1,6 +1,6 @@
 package org.jboss.windup.tooling;
 
-import java.nio.file.Path;
+import java.rmi.RemoteException;
 
 /**
  * Allows setting the input path.
@@ -12,5 +12,5 @@ public interface ExecutionBuilderSetInput
     /**
      * Sets the input path (application source directory, or application binary file).
      */
-    ExecutionBuilderSetOutput setInput(Path input);
+	void setInput(String input) throws RemoteException;
 }
