@@ -22,7 +22,6 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.forge.furnace.Furnace;
@@ -57,6 +56,8 @@ import com.tinkerpop.frames.modules.Module;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import org.jboss.windup.graph.model.WindupEdgeFrame;
+import org.jboss.windup.graph.service.GraphService;
+import org.jboss.windup.util.exception.WindupException;
 
 public class GraphContextImpl implements GraphContext
 {
@@ -310,28 +311,36 @@ public class GraphContextImpl implements GraphContext
         Path berkeley = graphDir.resolve("titangraph");
 
         conf = new BaseConfiguration();
+        String cassandraHost = System.getProperty("cassandra.host");
+        LOG.info("Cassandra host: " + cassandraHost);
+
         // Sets a unique id in order to fix WINDUP-697. This causes Titan to not attempt to generate and ID,
         // as the Titan id generation code fails on machines with broken network configurations.
         conf.setProperty("graph.unique-instance-id", "windup_" + System.nanoTime() + "_" + RandomStringUtils.randomAlphabetic(6));
-        // conf.setProperty("storage.backend", "cassandra");
-        // conf.setProperty("storage.hostname", "127.0.0.1");
-        // conf.setProperty("storage.directory", berkeley.toAbsolutePath().toString());
-        try
+        if (StringUtils.isNotBlank(cassandraHost))
         {
-            Files.createDirectories(berkeley);
-            String cassandraYAML = IOUtils.toString(GraphContextImpl.class.getResource("/cassandra_template.yaml"));
-            cassandraYAML = cassandraYAML.replace("GRAPH_DIR", berkeley.normalize().toAbsolutePath().toString());
-            File cassandraConfigPath = berkeley.resolve("cassandra.yaml").toFile();
-            try (FileWriter fw = new FileWriter(cassandraConfigPath))
+            conf.setProperty("storage.backend", "cassandra");
+            conf.setProperty("storage.hostname", cassandraHost);
+            conf.setProperty("storage.directory", berkeley.toAbsolutePath().toString());
+        } else
+        {
+            try
             {
-                fw.write(cassandraYAML);
+                Files.createDirectories(berkeley);
+                String cassandraYAML = IOUtils.toString(GraphContextImpl.class.getResource("/cassandra_template.yaml"));
+                cassandraYAML = cassandraYAML.replace("GRAPH_DIR", berkeley.normalize().toAbsolutePath().toString());
+                File cassandraConfigPath = berkeley.resolve("cassandra.yaml").toFile();
+                try (FileWriter fw = new FileWriter(cassandraConfigPath))
+                {
+                    fw.write(cassandraYAML);
+                }
+                conf.setProperty("storage.backend", "embeddedcassandra");
+                conf.setProperty("storage.conf-file", cassandraConfigPath.getAbsolutePath());
             }
-            conf.setProperty("storage.backend", "embeddedcassandra");
-            conf.setProperty("storage.conf-file", cassandraConfigPath.getAbsolutePath());
-        }
-        catch (IOException e)
-        {
-            throw new WindupException("Error writing cassnadra configuration due to: " + e.getMessage(), e);
+            catch (IOException e)
+            {
+                throw new WindupException("Error writing cassnadra configuration due to: " + e.getMessage(), e);
+            }
         }
 
         // Sets the berkeley cache to a relatively small value to reduce the memory footprint.

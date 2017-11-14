@@ -352,12 +352,6 @@ public class Bootstrap
     {
         if (furnace != null && !furnace.getStatus().isStopped())
             furnace.stop();
-
-        // redirect output (to avoid spurious undeploy messages from weld)
-        System.setErr(new PrintStream(new ByteArrayOutputStream()));
-        System.setOut(new PrintStream(new ByteArrayOutputStream()));
-
-        System.exit(0);
     }
 
     private List<Command> processArguments(List<String> arguments)
