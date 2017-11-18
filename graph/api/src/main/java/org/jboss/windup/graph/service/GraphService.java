@@ -1,13 +1,9 @@
 package org.jboss.windup.graph.service;
 
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.apache.tools.ant.BuildException;
-import org.jboss.windup.graph.FramedElementInMemory;
 import org.jboss.windup.graph.GraphContext;
-import org.jboss.windup.graph.model.InMemoryVertexFrame;
 import org.jboss.windup.graph.model.WindupVertexFrame;
 import org.jboss.windup.graph.service.exception.NonUniqueResultException;
 import org.jboss.windup.util.ExecutionStatistics;
@@ -16,12 +12,9 @@ import org.jboss.windup.util.Task;
 import com.thinkaurelius.titan.core.TitanTransaction;
 import com.thinkaurelius.titan.core.attribute.Text;
 import com.thinkaurelius.titan.util.datastructures.IterablesUtil;
-import com.tinkerpop.blueprints.GraphQuery;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import com.tinkerpop.frames.FramedGraphQuery;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.modules.typedgraph.TypeValue;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
 
 public class GraphService<T extends WindupVertexFrame> implements Service<T>
 {
@@ -48,7 +41,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
             @Override
             public Void execute()
             {
-                getGraphContext().getGraph().getBaseGraph().commit();
+                getGraphContext().getGraph().tx().commit();
                 return null;
             }
         });
@@ -60,22 +53,13 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.count", new Task<Long>()
         {
             @Override
-            public Long execute() throws BuildException
+            public Long execute()
             {
-                GremlinPipeline<Iterable<?>, Object> pipe = new GremlinPipeline<>();
+                Gremlin<Iterable<?>, Object> pipe = new GremlinPipeline<>();
                 long result = pipe.start(obj).count();
                 return result;
             }
         });
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public T createInMemory()
-    {
-        Class<?>[] resolvedTypes = new Class<?>[] { VertexFrame.class, InMemoryVertexFrame.class, type };
-        return (T) Proxy.newProxyInstance(this.type.getClassLoader(),
-                    resolvedTypes, new FramedElementInMemory<>(this.type));
     }
 
     /**
