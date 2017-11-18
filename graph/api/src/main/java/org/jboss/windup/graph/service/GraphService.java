@@ -9,7 +9,6 @@ import org.jboss.windup.graph.service.exception.NonUniqueResultException;
 import org.jboss.windup.util.ExecutionStatistics;
 import org.jboss.windup.util.Task;
 
-import com.thinkaurelius.titan.core.TitanTransaction;
 import com.thinkaurelius.titan.core.attribute.Text;
 import com.thinkaurelius.titan.util.datastructures.IterablesUtil;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -48,15 +47,17 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
     }
 
     @Override
-    public long count(final Iterable<?> obj)
+    public long count(final Iterable<?> objects)
     {
         return ExecutionStatistics.performBenchmarked("GraphService.count", new Task<Long>()
         {
             @Override
             public Long execute()
             {
-                Gremlin<Iterable<?>, Object> pipe = new GremlinPipeline<>();
-                long result = pipe.start(obj).count();
+                long result = 0;
+                for (Object object : objects)
+                    result++;
+
                 return result;
             }
         });
@@ -71,7 +72,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.create", new Task<T>()
         {
             @Override
-            public T execute() throws BuildException
+            public T execute()
             {
                 return context.getFramed().addVertex(null, type);
             }
@@ -84,7 +85,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.addTypeToModel", new Task<T>()
         {
             @Override
-            public T execute() throws BuildException
+            public T execute()
             {
                 return GraphService.addTypeToModel(getGraphContext(), model, type);
             }
@@ -108,7 +109,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.findAllByProperties(" + Arrays.asList(keys) + ")", new Task<Iterable<T>>()
         {
             @Override
-            public Iterable<T> execute() throws BuildException
+            public Iterable<T> execute()
             {
                 FramedGraphQuery query = findAllQuery();
 
@@ -131,7 +132,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.findAllByProperty(" + key + ")", new Task<Iterable<T>>()
         {
             @Override
-            public Iterable<T> execute() throws BuildException
+            public Iterable<T> execute()
             {
                 return context.getFramed().getVertices(key, value, type);
             }
@@ -144,7 +145,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.findAllWithoutProperty(" + key + ")", new Task<Iterable<T>>()
         {
             @Override
-            public Iterable<T> execute() throws BuildException
+            public Iterable<T> execute()
             {
                 return findAllQuery().hasNot(key, value).vertices(type);
             }
@@ -157,7 +158,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.findAllWithoutProperty(" + key + ")", new Task<Iterable<T>>()
         {
             @Override
-            public Iterable<T> execute() throws BuildException
+            public Iterable<T> execute()
             {
                 return findAllQuery().hasNot(key).vertices(type);
             }
@@ -170,7 +171,7 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return ExecutionStatistics.performBenchmarked("GraphService.findAllByPropertyMatchingRegex(" + key + ")", new Task<Iterable<T>>()
         {
             @Override
-            public Iterable<T> execute() throws BuildException
+            public Iterable<T> execute()
             {
                 if (regex.length == 0)
                     return IterablesUtil.emptyIterable();
@@ -219,11 +220,6 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
     public Class<T> getType()
     {
         return this.type;
-    }
-
-    protected GraphQuery getTypedQuery()
-    {
-        return getGraphContext().getQuery().type(type);
     }
 
     /**
@@ -279,35 +275,9 @@ public class GraphService<T extends WindupVertexFrame> implements Service<T>
         return result;
     }
 
-    protected T getUnique(GraphQuery framedQuery)
-    {
-        Iterable<Vertex> results = framedQuery.vertices();
-
-        if (!results.iterator().hasNext())
-        {
-            return null;
-        }
-
-        Iterator<Vertex> iter = results.iterator();
-        Vertex result = iter.next();
-
-        if (iter.hasNext())
-        {
-            throw new NonUniqueResultException("Expected unique value, but returned non-unique.");
-        }
-
-        return frame(result);
-    }
-
     protected GraphContext getGraphContext()
     {
         return context;
-    }
-
-    @Override
-    public TitanTransaction newTransaction()
-    {
-        return context.getGraph().getBaseGraph().newTransaction();
     }
 
     /**
